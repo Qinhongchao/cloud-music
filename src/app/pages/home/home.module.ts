@@ -1,3 +1,4 @@
+import { HomeResolveService } from './components/home-resolve.service';
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -15,6 +16,7 @@ import { MemberCardComponent } from './components/member-card/member-card.compon
     CommonModule,
     ShareModule,
     HomeRoutingModule
-  ]
+  ],
+  providers:[HomeResolveService]
 })
 export class HomeModule { }
