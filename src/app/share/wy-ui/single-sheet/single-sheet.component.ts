@@ -1,5 +1,6 @@
 import { SongSheet } from './../../../data-types/common.types';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+
 
 @Component({
   selector: 'app-single-sheet',
@@ -8,6 +9,9 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class SingleSheetComponent implements OnInit {
 
+  @Output()
+  onPlay=new EventEmitter<number>();
+
   @Input()
   sheet:SongSheet;
   
@@ -15,5 +19,11 @@ export class SingleSheetComponent implements OnInit {
 
   ngOnInit(): void {
   }
+
+  playSheet(id:number){
+    this.onPlay.emit(id);
+  }
+
+
 
 }

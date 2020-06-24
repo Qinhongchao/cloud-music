@@ -1,3 +1,4 @@
+import { SheetService } from './../../services/sheet.service';
 import { SingerService } from './../../services/singer.service';
 import { HotTag, SongSheet, Singer } from './../../data-types/common.types';
 import { HomeService } from './../../services/home.service';
@@ -22,7 +23,7 @@ export class HomeComponent implements OnInit {
 
   @ViewChild(NzCarouselComponent, { static: true }) private nzCarousel: NzCarouselComponent
 
-  constructor(private homeService: HomeService,private singerService:SingerService,private route:ActivatedRoute) {
+  constructor(private homeService: HomeService,private singerService:SingerService,private route:ActivatedRoute,private sheetService:SheetService) {
 
     this.route.data.pipe(map(res=>res.homeDatas)).subscribe(
       ([banners,hotTags,songSheetList,singers])=>{
@@ -32,7 +33,6 @@ export class HomeComponent implements OnInit {
         this.singers=singers;
       }
     )
-   
 
   }
 
@@ -45,6 +45,12 @@ export class HomeComponent implements OnInit {
 
   onChangeSlide(type: 'pre' | 'next') {
     this.nzCarousel[type]();
+  }
+
+  onPlaySheet(id:number){
+    this.sheetService.playSheet(id).subscribe(res=>{
+      console.log('res:',res);
+    })
   }
 
 }
