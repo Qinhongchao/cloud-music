@@ -16,7 +16,6 @@ import { ShareModule } from './share/share.module';
   ],
   imports: [
     CoreModule
-  
   ],
   
   bootstrap: [AppComponent]
