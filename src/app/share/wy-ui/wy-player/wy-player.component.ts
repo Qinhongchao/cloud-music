@@ -1,4 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { SetCurrentIndex, SetPlayMode, SetPlayList } from './../../../store/actions/player.action';
+import { PlayMode } from './player.type';
+import { getSongList, getPlayList, getCurrentIndex, getCurrentSong, getPlayMode } from './../../../store/selectors/player.selector';
+import { AppStoreModule } from './../../../store/index';
+import { Component, OnInit, ViewChild, ElementRef, Inject } from '@angular/core';
+import { Store, select } from '@ngrx/store';
+import { Song } from 'src/app/data-types/common.types';
+import { Subscription, fromEvent } from 'rxjs';
+import { shuffle } from 'src/app/utils/array';
+
+const modelTypes: PlayMode[] = [
+  {
+    type: 'loop',
+    label: '循环'
+  },
+  {
+    type: 'random',
+    label: '随机'
+  },
+  {
+    type: 'singleLoop',
+    label: '单曲循环'
+  },
+]
 
 @Component({
   selector: 'app-wy-player',
@@ -7,13 +31,233 @@ import { Component, OnInit } from '@angular/core';
 })
 export class WyPlayerComponent implements OnInit {
 
-  public sliderValue=30;
-  public  bufferOffset=80;
-  
+  public percent = 0;
+  public bufferPercent = 0;
+  public songList: Song[];
+  public playList: Song[];
+  public playMode: PlayMode;
+  public currentIndex: number;
+  public currentSong: Song;
+  public duration: number;
+  public currentTime: number;
+  public volume: number = 20;
+  public showVolumePanel = false;
+  public selfClick = false;
+  public winClick: Subscription;
+  public currentMode: PlayMode;
+  public modeCount=0;
 
-  constructor() { }
+  public playing = false;
+  public songReady = false;
 
-  ngOnInit(): void {
+  @ViewChild('audio', { static: true })
+  private audio: ElementRef;
+
+
+  private audioEl: HTMLAudioElement;
+
+
+  constructor(
+    private store$: Store<AppStoreModule>,
+    @Inject(DOCUMENT) private doc: Document
+  ) {
+
+
+    const stateArr = [
+      {
+        type: getSongList,
+        cb: list => this.watchList(list, 'songList')
+      },
+      {
+        type: getPlayList,
+        cb: list => this.watchList(list, 'playList')
+      },
+      {
+        type: getCurrentIndex,
+        cb: index => this.watchCurrentIndex(index)
+      },
+      {
+        type: getCurrentSong,
+        cb: song => this.watchCurrentSong(song)
+      },
+      {
+        type: getPlayMode,
+        cb: playMode => this.watchPlayMode(playMode)
+      },
+
+    ];
+    const appStore$ = this.store$.pipe(select('player'));
+    stateArr.forEach(item => {
+      appStore$.pipe(select(item.type)).subscribe(item.cb);
+    })
+
+
   }
 
+  ngOnInit(): void {
+    this.audioEl = this.audio.nativeElement;
+  }
+
+  watchCurrentIndex(index: number) {
+    this.currentIndex = index;
+  }
+  watchList(list: Song[], type: string) {
+    this[type] = list;
+  }
+
+  watchCurrentSong(song: Song) {
+
+    if (song) {
+      this.currentSong = song;
+      this.duration = song.dt / 1000;
+    }
+
+  }
+  watchPlayMode(mode: PlayMode) {
+    this.currentMode = mode;
+    if(this.songList){
+      let list=this.songList.slice();
+      if(mode.type==='random'){
+        list=shuffle(this.songList);
+        this.updateCurrentIndex(list,this.currentSong);
+      this.store$.dispatch(SetPlayList({playList:list}))
+      }
+      
+    }
+  }
+  updateCurrentIndex(list: Song[], song: Song) {
+    const newIndex=list.findIndex(item=>item.id===song.id);
+    this.store$.dispatch(SetCurrentIndex({currentIndex:newIndex}));
+  }
+
+  private onCanplay() {
+    this.songReady = true;
+    this.play();
+  }
+  play() {
+    this.audioEl.play();
+    this.playing = true;
+  }
+
+  get picUrl(): string {
+    return this.currentSong ? this.currentSong.al.picUrl : '#'
+  }
+
+  onTimeUpdate(e: Event) {
+    this.currentTime = (<HTMLAudioElement>e.target).currentTime;
+    this.percent = (this.currentTime / this.duration) * 100;
+    const buffered = this.audioEl.buffered;
+    if (buffered.length && this.bufferPercent < 100) {
+      this.bufferPercent = (buffered.end(0) / this.duration) * 100;
+    }
+  }
+
+  onToggle() {
+
+    if (!this.currentSong) {
+      if (this.playList.length) {
+        this.store$.dispatch(SetCurrentIndex({ currentIndex: 0 }));
+        this.songReady = false;
+      }
+    } else {
+
+      if (this.songReady) {
+        this.playing = !this.playing;
+        if (this.playing) {
+          this.audioEl.play();
+        } else {
+          this.audioEl.pause();
+        }
+      }
+
+    }
+  }
+
+  onPrev(index: number) {
+    if (!this.songReady) return;
+    if (this.playList.length === 1) {
+      this.loop();
+    } else {
+      const newIndex = index <= 0 ? 0 : index;
+      this.updateIndex(newIndex);
+    }
+  }
+
+  onNext(index: number) {
+    if (!this.songReady) return;
+    if (this.playList.length === 1) {
+      this.loop();
+    } else {
+      const newIndex = index >= this.playList.length ? this.playList.length - 1 : index;
+      this.updateIndex(newIndex);
+    }
+
+  }
+  loop() {
+    this.audioEl.currentTime = 0;
+    this.play();
+  }
+
+  private updateIndex(index: number) {
+    this.store$.dispatch(SetCurrentIndex({ currentIndex: index }));
+    this.songReady = false;
+  }
+
+  onPercentChange(percent: number) {
+    if (this.currentSong) {
+      this.audioEl.currentTime = this.duration * (percent / 100);
+    }
+
+  }
+
+
+  onVolumeChange(per: number) {
+    this.audioEl.volume = per / 100;
+  }
+
+  toggleVolPanel(evt: MouseEvent) {
+    //evt.stopPropagation();
+    this.togglePanel();
+  }
+
+  togglePanel() {
+    this.showVolumePanel = !this.showVolumePanel;
+    if (this.showVolumePanel) {
+      this.bindDocumentClickListener();
+    } else {
+      this.unbindDocumentClickListener();
+    }
+  }
+  unbindDocumentClickListener() {
+    if (this.winClick) {
+      this.winClick.unsubscribe();
+      this.winClick = null;
+    }
+  }
+  bindDocumentClickListener() {
+    if (!this.winClick) {
+      this.winClick = fromEvent(this.doc, 'click').subscribe(() => {
+        if (!this.selfClick) {
+          this.showVolumePanel = false;
+          this.unbindDocumentClickListener();
+        }
+
+        this.selfClick = false;
+      })
+    }
+  }
+
+  changeMode() {
+    const temp=modelTypes[++this.modeCount%3];
+    this.store$.dispatch(SetPlayMode({playMode:temp}))
+  }
+
+  onEnded(){
+    this.playing=false;
+    if(this.currentMode.type==='singleLoop'){
+      this.loop();
+    }else{
+      this.onNext(this.currentIndex=1);
+    }
+  }
 }

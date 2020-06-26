@@ -1,3 +1,4 @@
+import { AppStoreModule } from './../store/index';
 
 import { NgModule, SkipSelf, Optional } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
@@ -22,6 +23,7 @@ registerLocaleData(zh);
     PagesModule,
     ShareModule,
     AppRoutingModule,
+    AppStoreModule
   ],
   exports:[
     ShareModule,

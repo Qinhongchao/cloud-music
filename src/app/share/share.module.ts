@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {NgZorroAntdModule} from 'ng-zorro-antd';
+import { FormatTimePipe } from './pipes/format-time.pipe';
 
 
 
@@ -21,6 +22,7 @@ import {NgZorroAntdModule} from 'ng-zorro-antd';
     NgZorroAntdModule,
     WyUiModule,
    
-  ]
+  ],
+  declarations: []
 })
 export class ShareModule { }

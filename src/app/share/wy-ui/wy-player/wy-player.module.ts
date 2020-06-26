@@ -1,3 +1,4 @@
+import { FormatTimePipe } from './../../pipes/format-time.pipe';
 import { FormsModule } from '@angular/forms';
 import { WySliderModule } from './../wy-slider/wy-slider.module';
 import { NgModule } from '@angular/core';
@@ -7,13 +8,13 @@ import { WyPlayerComponent } from './wy-player.component';
 
 
 @NgModule({
-  declarations: [WyPlayerComponent],
+  declarations: [WyPlayerComponent,FormatTimePipe],
   imports: [
     CommonModule,
     FormsModule,
     WySliderModule,
     
   ],
-  exports:[WyPlayerComponent]
+  exports:[WyPlayerComponent,FormatTimePipe]
 })
 export class WyPlayerModule { }
