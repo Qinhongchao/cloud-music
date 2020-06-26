@@ -40,12 +40,14 @@ export class WyPlayerComponent implements OnInit {
   public currentSong: Song;
   public duration: number;
   public currentTime: number;
-  public volume: number = 20;
+  public volume: number = 10;
   public showVolumePanel = false;
+  public showListPanel=false;
   public selfClick = false;
   public winClick: Subscription;
   public currentMode: PlayMode;
   public modeCount=0;
+  public showPanel:boolean=false;
 
   public playing = false;
   public songReady = false;
@@ -215,14 +217,23 @@ export class WyPlayerComponent implements OnInit {
     this.audioEl.volume = per / 100;
   }
 
-  toggleVolPanel(evt: MouseEvent) {
-    //evt.stopPropagation();
-    this.togglePanel();
+  toggleVolPanel() {
+    
+    this.togglePanel('showVolumePanel');
   }
 
-  togglePanel() {
-    this.showVolumePanel = !this.showVolumePanel;
-    if (this.showVolumePanel) {
+  toggleListPanel() {
+    
+    if(this.songList.length){
+      this.togglePanel('showListPanel');
+    }
+    
+  }
+
+  togglePanel(type:string) {
+
+    this[type] = !this[type];
+    if (this.showVolumePanel||this.showListPanel) {
       this.bindDocumentClickListener();
     } else {
       this.unbindDocumentClickListener();
@@ -239,6 +250,7 @@ export class WyPlayerComponent implements OnInit {
       this.winClick = fromEvent(this.doc, 'click').subscribe(() => {
         if (!this.selfClick) {
           this.showVolumePanel = false;
+          this.showListPanel=false;
           this.unbindDocumentClickListener();
         }
 
@@ -259,5 +271,9 @@ export class WyPlayerComponent implements OnInit {
     }else{
       this.onNext(this.currentIndex=1);
     }
+  }
+
+  onChangeSong(song:Song){
+    this.updateCurrentIndex(this.playList,song);
   }
 }
