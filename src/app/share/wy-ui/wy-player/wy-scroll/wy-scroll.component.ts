@@ -21,6 +21,7 @@ BScroll.use(MouseWheel)
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WyScrollComponent implements OnInit ,AfterViewInit,OnChanges{
+ 
 
   @ViewChild('wrap', { static: true })
   private wrapRef: ElementRef;
@@ -77,6 +78,10 @@ export class WyScrollComponent implements OnInit ,AfterViewInit,OnChanges{
 
   scrollToElement(...args){
     this.bs.scrollToElement.apply(this.bs,args);
+  }
+
+  scrollTo(arg0: number, arg1: number) {
+    
   }
 
 }
