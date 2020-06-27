@@ -5,11 +5,13 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WyPlayerComponent } from './wy-player.component';
 import { WyPlayerPanelComponent } from './wy-player-panel/wy-player-panel.component';
+import { WyScrollComponent } from './wy-scroll/wy-scroll.component';
+
 
 
 
 @NgModule({
-  declarations: [WyPlayerComponent,FormatTimePipe, WyPlayerPanelComponent],
+  declarations: [WyPlayerComponent,FormatTimePipe, WyPlayerPanelComponent,WyScrollComponent],
   imports: [
     CommonModule,
     FormsModule,

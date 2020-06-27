@@ -1,3 +1,4 @@
+
 import { DOCUMENT } from '@angular/common';
 import { SetCurrentIndex, SetPlayMode, SetPlayList } from './../../../store/actions/player.action';
 import { PlayMode } from './player.type';
@@ -7,7 +8,7 @@ import { Component, OnInit, ViewChild, ElementRef, Inject } from '@angular/core'
 import { Store, select } from '@ngrx/store';
 import { Song } from 'src/app/data-types/common.types';
 import { Subscription, fromEvent } from 'rxjs';
-import { shuffle } from 'src/app/utils/array';
+import { shuffle, findIndex } from 'src/app/utils/array';
 
 const modelTypes: PlayMode[] = [
   {
@@ -40,7 +41,7 @@ export class WyPlayerComponent implements OnInit {
   public currentSong: Song;
   public duration: number;
   public currentTime: number;
-  public volume: number = 10;
+  public volume: number = 5;
   public showVolumePanel = false;
   public showListPanel=false;
   public selfClick = false;
@@ -128,7 +129,7 @@ export class WyPlayerComponent implements OnInit {
     }
   }
   updateCurrentIndex(list: Song[], song: Song) {
-    const newIndex=list.findIndex(item=>item.id===song.id);
+    const newIndex=findIndex(list,song);
     this.store$.dispatch(SetCurrentIndex({currentIndex:newIndex}));
   }
 

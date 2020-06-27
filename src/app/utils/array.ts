@@ -1,5 +1,7 @@
 import { getRandomInt } from './number';
 
+import { Song } from '../data-types/common.types';
+
 export function inArray(arr:any[],target:any):boolean{
     return arr.indexOf(target)!==-1;
 }
@@ -11,4 +13,8 @@ export function shuffle<T> (arr:T[]):T[]{
     }
 
     return result;
+}
+
+export function  findIndex(list:Song[],current:Song){
+    return list.findIndex(item=>item.id==current.id);
 }
