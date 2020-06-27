@@ -1,3 +1,4 @@
+import { getPlayer } from './../../store/selectors/player.selector';
 import { shuffle, findIndex } from 'src/app/utils/array';
 import { SetPlayList, SetSongList, SetCurrentIndex } from './../../store/actions/player.action';
 import { AppStoreModule } from './../../store/index';
@@ -44,7 +45,7 @@ export class HomeComponent implements OnInit {
       }
     )
 
-    this.store$.pipe(select('player')).subscribe(playerState=>{
+    this.store$.pipe(select(getPlayer)).subscribe(playerState=>{
       this.playerState=<PlayState>playerState;
     })
 

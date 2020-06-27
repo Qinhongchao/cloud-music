@@ -2,7 +2,7 @@
 import { DOCUMENT } from '@angular/common';
 import { SetCurrentIndex, SetPlayMode, SetPlayList } from './../../../store/actions/player.action';
 import { PlayMode } from './player.type';
-import { getSongList, getPlayList, getCurrentIndex, getCurrentSong, getPlayMode } from './../../../store/selectors/player.selector';
+import { getSongList, getPlayList, getCurrentIndex, getCurrentSong, getPlayMode, getPlayer } from './../../../store/selectors/player.selector';
 import { AppStoreModule } from './../../../store/index';
 import { Component, OnInit, ViewChild, ElementRef, Inject } from '@angular/core';
 import { Store, select } from '@ngrx/store';
@@ -65,34 +65,13 @@ export class WyPlayerComponent implements OnInit {
     @Inject(DOCUMENT) private doc: Document
   ) {
 
-
-    const stateArr = [
-      {
-        type: getSongList,
-        cb: list => this.watchList(list, 'songList')
-      },
-      {
-        type: getPlayList,
-        cb: list => this.watchList(list, 'playList')
-      },
-      {
-        type: getCurrentIndex,
-        cb: index => this.watchCurrentIndex(index)
-      },
-      {
-        type: getCurrentSong,
-        cb: song => this.watchCurrentSong(song)
-      },
-      {
-        type: getPlayMode,
-        cb: playMode => this.watchPlayMode(playMode)
-      },
-
-    ];
-    const appStore$ = this.store$.pipe(select('player'));
-    stateArr.forEach(item => {
-      appStore$.pipe(select(item.type)).subscribe(item.cb);
-    })
+    const appStore$ = this.store$.pipe(select(getPlayer));
+    appStore$.pipe(select(getSongList)).subscribe(list => this.watchList(list, 'songList'));
+    appStore$.pipe(select(getPlayList)).subscribe(list => this.watchList(list, 'playList'));
+    appStore$.pipe(select(getCurrentIndex)).subscribe(index => this.watchCurrentIndex(index));
+    appStore$.pipe(select(getPlayMode)).subscribe(mode => this.watchPlayMode(mode));
+    appStore$.pipe(select(getCurrentSong)).subscribe(song => this.watchCurrentSong(song));
+    
 
 
   }
@@ -133,7 +112,7 @@ export class WyPlayerComponent implements OnInit {
     this.store$.dispatch(SetCurrentIndex({currentIndex:newIndex}));
   }
 
-  private onCanplay() {
+ onCanplay() {
     this.songReady = true;
     this.play();
   }
