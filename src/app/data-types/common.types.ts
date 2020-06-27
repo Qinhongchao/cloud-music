@@ -40,3 +40,7 @@ export type SongUrl={
     url:string;
 }
 
+export type Lyric={
+    lyric:string;
+    tlyric:string;
+}
