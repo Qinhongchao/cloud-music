@@ -80,7 +80,7 @@ export class WyScrollComponent implements OnInit ,AfterViewInit,OnChanges{
     this.bs.scrollToElement.apply(this.bs,args);
   }
 
-  scrollTo(arg0: number, arg1: number) {
+  scrollTo(...args) {
     
   }
 

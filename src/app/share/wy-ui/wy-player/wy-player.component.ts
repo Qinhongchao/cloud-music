@@ -1,3 +1,4 @@
+import { WyPlayerPanelComponent } from './wy-player-panel/wy-player-panel.component';
 
 import { DOCUMENT } from '@angular/common';
 import { SetCurrentIndex, SetPlayMode, SetPlayList } from './../../../store/actions/player.action';
@@ -58,6 +59,9 @@ export class WyPlayerComponent implements OnInit {
 
 
   private audioEl: HTMLAudioElement;
+
+  @ViewChild(WyPlayerPanelComponent, { static: false })
+  public playerPanel: WyPlayerPanelComponent;
 
 
   constructor(
@@ -178,6 +182,7 @@ export class WyPlayerComponent implements OnInit {
   loop() {
     this.audioEl.currentTime = 0;
     this.play();
+    this.playerPanel.seekLyric(0);
   }
 
   private updateIndex(index: number) {
@@ -187,7 +192,13 @@ export class WyPlayerComponent implements OnInit {
 
   onPercentChange(percent: number) {
     if (this.currentSong) {
-      this.audioEl.currentTime = this.duration * (percent / 100);
+
+      const currentTime=this.duration * (percent / 100)
+      this.audioEl.currentTime = currentTime;
+      if(this.playerPanel){
+        this.playerPanel.seekLyric(currentTime*1000);
+      }
+      
     }
 
   }

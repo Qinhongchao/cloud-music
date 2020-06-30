@@ -30,7 +30,11 @@ export class WyPlayerPanelComponent implements OnInit, OnChanges {
 
   public scrollY: number = 0;
   private lyric: WyLyric;
+
+  private lyricRefs:NodeList;
+
   public currentLineNum: number;
+  startLine: number;
 
   constructor(private songServe: SongService) { }
 
@@ -57,6 +61,8 @@ export class WyPlayerPanelComponent implements OnInit, OnChanges {
         if (this.show) {
           this.scrollToCurrent();
         }
+      }else{
+        this.resetLyric();
       }
     }
     if (changes['show']) {
@@ -77,7 +83,8 @@ export class WyPlayerPanelComponent implements OnInit, OnChanges {
     this.songServe.getLyric(this.currentSong.id).subscribe(res => {
       this.lyric = new WyLyric(res);
       this.currentLyric = this.lyric.lines;
-      this.handleLyric();
+      const startLine=res.tlyric?1:2
+      this.handleLyric(startLine);;
       this.wyScroll.last.scrollTo(0, 0);
       if (this.playing) {
           this.lyric.play();
@@ -86,10 +93,40 @@ export class WyPlayerPanelComponent implements OnInit, OnChanges {
   }
 
 
-  handleLyric() {
+  handleLyric(startLine=2) {
+  // this.resetLyric();
+
     this.lyric.handler.subscribe(({lineNum})=>{
-     this.currentLineNum=lineNum;
+      if(!this.lyricRefs){
+        this.lyricRefs=this.wyScroll.last.el.nativeElement.querySelectorAll('ul li');
+      }
+
+      if(this.lyricRefs.length){
+        this.currentLineNum=lineNum;
+        if(lineNum>startLine){
+          const targetLine=this.lyricRefs[lineNum-startLine];
+          if(targetLine){
+            this.wyScroll.last.scrollToElement(targetLine,300,false,false);
+          }
+        }else{
+          this.wyScroll.last.scrollTo(0,0);
+        }
+
+       
+      }
+      
+     
     })
+  }
+  resetLyric() {
+    if(this.lyric){
+      this.lyric.stop();
+      this.lyric=null;
+      this.currentLyric=[];
+      this.currentLineNum=0;
+      this.lyricRefs=null;
+
+    }
   }
   scrollToCurrent(speed = 300) {
     const songListRefs = this.wyScroll.first.el.nativeElement.querySelectorAll('ul li');
@@ -103,6 +140,12 @@ export class WyPlayerPanelComponent implements OnInit, OnChanges {
     }
   }
 
+
+  seekLyric(time:number){
+    if(this.lyric){
+      this.lyric.seek(time);
+    }
+  }
 
 
 }

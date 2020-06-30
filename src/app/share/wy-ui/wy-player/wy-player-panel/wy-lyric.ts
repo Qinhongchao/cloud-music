@@ -1,6 +1,6 @@
 
 import { Lyric } from 'src/app/data-types/common.types';
-import { zip, from, Subject } from 'rxjs';
+import { zip, Subject, Subscription, timer, from } from 'rxjs';
 import { skip } from 'rxjs/internal/operators';
 
 export interface BaseLyricLine {
@@ -28,7 +28,7 @@ export class WyLyric {
     private playing=false;
     private curNum: any;
     private startStamp: number;
-    private timer:any;
+    private timer$:Subscription;
 
     handler =new Subject<Handler>();
     pauseStamp: number;
@@ -106,7 +106,7 @@ export class WyLyric {
 
     }
 
-    play(startTime=0) {
+    play(startTime=0,skip=false) {
         if(!this.lines.length) return ;
 
         if(!this.playing){
@@ -114,9 +114,11 @@ export class WyLyric {
         }
         this.curNum=this.findCurNum(startTime);
         this.startStamp=Date.now()-startTime;
-        
+        if(!skip){
+            this.callHandler(this.curNum-1);
+        }  
         if(this.curNum<this.lines.length){
-            clearTimeout(this.timer);
+            this.clearTimer();
             this.playReset();
         }
 
@@ -124,20 +126,24 @@ export class WyLyric {
     playReset() {
         let line =this.lines[this.curNum];
         const delay=line.time-(Date.now()-this.startStamp);
-        this.timer=  setTimeout(()=>{
+        this.timer$=timer(delay).subscribe(()=>{
             this.callHandler(this.curNum++);
             if(this.curNum<this.lines.length&&this.playing){
                 this.playReset();
             }
-        },delay)
+        })
+
     }
 
     callHandler(i: number) {
-        this.handler.next({
-            txt:this.lines[i].txt,
-            txtCn:this.lines[i].txtCn,
-            lineNum:i
-        });
+        if(i>0){
+            this.handler.next({
+                txt:this.lines[i].txt,
+                txtCn:this.lines[i].txtCn,
+                lineNum:i
+            });
+        }
+       
     }
 
     findCurNum(time: number): number {
@@ -151,7 +157,7 @@ export class WyLyric {
         this.playing=playing;
         if(playing){
             const startTime =(this.pauseStamp||now)-(this.startStamp||now);
-            this.play(startTime);
+            this.play(startTime,true);
         }else{
             this.stop();
             this.pauseStamp=now;
@@ -161,6 +167,14 @@ export class WyLyric {
        if(this.playing){
            this.playing=false;
        }
-       clearTimeout(this.timer);
+       this.clearTimer();
+    }
+
+    seek(time:number){
+        this.play(time);
+    }
+
+    private clearTimer(){
+        this.timer$&&this.timer$.unsubscribe();
     }
 }
