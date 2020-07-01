@@ -10,7 +10,7 @@ import { HomeService } from './../../services/home.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Banner } from 'src/app/data-types/common.types';
 import { NzCarouselComponent } from 'ng-zorro-antd';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs/internal/operators';
 import { Store, select } from '@ngrx/store';
 import { PlayState } from 'src/app/store/reducers/player.reducer';
@@ -33,8 +33,10 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private route:ActivatedRoute,
+    private router:Router,
     private sheetService:SheetService,
-    private batchActionsService:BatchActionsService
+    private batchActionsService:BatchActionsService,
+
     ) {
 
     this.route.data.pipe(map(res=>res.homeDatas)).subscribe(
@@ -65,6 +67,10 @@ export class HomeComponent implements OnInit {
     this.sheetService.playSheet(id).subscribe(list=>{
     this.batchActionsService.selectPlayList({list,index:0});
     })
+  }
+
+  toInfo(id:number){
+    this.router.navigate(['/sheetInfo',id]);
   }
 
 }

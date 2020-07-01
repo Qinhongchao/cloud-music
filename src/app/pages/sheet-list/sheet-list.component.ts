@@ -1,6 +1,6 @@
 import { BatchActionsService } from './../../store/batch-actions.service';
 import { SheetList } from './../../data-types/common.types';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SheetParams, SheetService } from './../../services/sheet.service';
 import { Component, OnInit } from '@angular/core';
 
@@ -26,6 +26,7 @@ export class SheetListComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router:Router,
     private sheetServe: SheetService,
     private batchActionsService:BatchActionsService
 
@@ -62,6 +63,8 @@ export class SheetListComponent implements OnInit {
     this.getList();
   }
 
- 
+  toInfo(id:number){
+    this.router.navigate(['/sheetInfo',id]);
+  }
 
 }
