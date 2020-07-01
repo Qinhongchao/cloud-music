@@ -1,7 +1,8 @@
+import { BatchActionsService } from './../../../store/batch-actions.service';
 import { WyPlayerPanelComponent } from './wy-player-panel/wy-player-panel.component';
 
 import { DOCUMENT } from '@angular/common';
-import { SetCurrentIndex, SetPlayMode, SetPlayList } from './../../../store/actions/player.action';
+import { SetCurrentIndex, SetPlayMode, SetPlayList, SetSongList } from './../../../store/actions/player.action';
 import { PlayMode } from './player.type';
 import { getSongList, getPlayList, getCurrentIndex, getCurrentSong, getPlayMode, getPlayer } from './../../../store/selectors/player.selector';
 import { AppStoreModule } from './../../../store/index';
@@ -10,6 +11,7 @@ import { Store, select } from '@ngrx/store';
 import { Song } from 'src/app/data-types/common.types';
 import { Subscription, fromEvent } from 'rxjs';
 import { shuffle, findIndex } from 'src/app/utils/array';
+import { NzModalService } from 'ng-zorro-antd';
 
 const modelTypes: PlayMode[] = [
   {
@@ -45,7 +47,7 @@ export class WyPlayerComponent implements OnInit {
   public volume: number = 5;
   public showVolumePanel = false;
   public showListPanel=false;
-  public selfClick = false;
+  public bindFlag = false;
   public winClick: Subscription;
   public currentMode: PlayMode;
   public modeCount=0;
@@ -53,6 +55,8 @@ export class WyPlayerComponent implements OnInit {
 
   public playing = false;
   public songReady = false;
+
+
 
   @ViewChild('audio', { static: true })
   private audio: ElementRef;
@@ -66,7 +70,9 @@ export class WyPlayerComponent implements OnInit {
 
   constructor(
     private store$: Store<AppStoreModule>,
-    @Inject(DOCUMENT) private doc: Document
+    @Inject(DOCUMENT) private doc: Document,
+    private nzModalService:NzModalService,
+    private batchActionsService:BatchActionsService
   ) {
 
     const appStore$ = this.store$.pipe(select(getPlayer));
@@ -105,9 +111,11 @@ export class WyPlayerComponent implements OnInit {
       let list=this.songList.slice();
       if(mode.type==='random'){
         list=shuffle(this.songList);
-        this.updateCurrentIndex(list,this.currentSong);
-      this.store$.dispatch(SetPlayList({playList:list}))
+       
       }
+
+      this.updateCurrentIndex(list,this.currentSong);
+      this.store$.dispatch(SetPlayList({playList:list}))
       
     }
   }
@@ -225,18 +233,18 @@ export class WyPlayerComponent implements OnInit {
 
     this[type] = !this[type];
     if (this.showVolumePanel||this.showListPanel) {
-      this.bindDocumentClickListener();
+      this.bindFlag=true;
     } else {
-      this.unbindDocumentClickListener();
+     this.bindFlag=false;
     }
   }
-  unbindDocumentClickListener() {
+ /*  unbindDocumentClickListener() {
     if (this.winClick) {
       this.winClick.unsubscribe();
       this.winClick = null;
     }
-  }
-  bindDocumentClickListener() {
+  } */
+/*   bindDocumentClickListener() {
     if (!this.winClick) {
       this.winClick = fromEvent(this.doc, 'click').subscribe(() => {
         if (!this.selfClick) {
@@ -248,7 +256,7 @@ export class WyPlayerComponent implements OnInit {
         this.selfClick = false;
       })
     }
-  }
+  } */
 
   changeMode() {
     const temp=modelTypes[++this.modeCount%3];
@@ -266,5 +274,26 @@ export class WyPlayerComponent implements OnInit {
 
   onChangeSong(song:Song){
     this.updateCurrentIndex(this.playList,song);
+  }
+
+  onClearSong(event:any){
+
+    this.nzModalService.confirm({
+      nzTitle:'确认删除列表？',
+      nzOnOk:()=>{
+       this.batchActionsService.clearSong();
+      }
+    })
+   
+  }
+
+  onDeleteSong(song:Song){
+    this.batchActionsService.deleteSong(song);
+  }
+
+  onClickOutSide(){
+    this.showVolumePanel=false;
+    this.showListPanel=false;
+    this.bindFlag=false;
   }
 }

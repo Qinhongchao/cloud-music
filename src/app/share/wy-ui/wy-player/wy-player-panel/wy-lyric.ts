@@ -18,7 +18,7 @@ interface Handler extends BaseLyricLine{
 
 
 
-const timeExp = /\[(\d{2}):(\d{2}).(\d{2,3})\]/;
+const timeExp = /\[(\d{2}):(\d{2})(\.\d{2,3})?\]/;
 export class WyLyric {
   
 

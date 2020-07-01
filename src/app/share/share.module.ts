@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {NgZorroAntdModule} from 'ng-zorro-antd';
 import { FormatTimePipe } from './pipes/format-time.pipe';
+import { ClickoutsideDirective } from './directives/clickoutside.directive';
 
 
 
@@ -20,8 +21,8 @@ import { FormatTimePipe } from './pipes/format-time.pipe';
     CommonModule,
     FormsModule,
     NgZorroAntdModule,
-    WyUiModule,
-   
+    WyUiModule
+    
   ],
   declarations: []
 })

@@ -1,3 +1,4 @@
+import { BatchActionsService } from './../../store/batch-actions.service';
 import { getPlayer } from './../../store/selectors/player.selector';
 import { shuffle, findIndex } from 'src/app/utils/array';
 import { SetPlayList, SetSongList, SetCurrentIndex } from './../../store/actions/player.action';
@@ -33,7 +34,7 @@ export class HomeComponent implements OnInit {
   constructor(
     private route:ActivatedRoute,
     private sheetService:SheetService,
-    private store$:Store<AppStoreModule>
+    private batchActionsService:BatchActionsService
     ) {
 
     this.route.data.pipe(map(res=>res.homeDatas)).subscribe(
@@ -45,9 +46,7 @@ export class HomeComponent implements OnInit {
       }
     )
 
-    this.store$.pipe(select(getPlayer)).subscribe(playerState=>{
-      this.playerState=<PlayState>playerState;
-    })
+ 
 
   }
 
@@ -64,18 +63,7 @@ export class HomeComponent implements OnInit {
 
   onPlaySheet(id:number){
     this.sheetService.playSheet(id).subscribe(list=>{
-      this.store$.dispatch(SetSongList({songList:list}));
-
-      let trueIndex=0;
-      let trueList:Song[]=list.slice();
-
-      if(this.playerState.playMode.type==='random'){
-        trueList=shuffle(list||[]);
-        trueIndex=findIndex(trueList,list[trueIndex])
-      }
-
-      this.store$.dispatch(SetPlayList({playList:trueList}));
-      this.store$.dispatch(SetCurrentIndex({currentIndex:trueIndex}));
+    this.batchActionsService.selectPlayList({list,index:0});
     })
   }
 
