@@ -1,5 +1,5 @@
 import { SongService } from './song.service';
-import { SongSheet, Song } from './../data-types/common.types';
+import { SongSheet, Song, SheetList } from './../data-types/common.types';
 
 import { Injectable, Inject } from '@angular/core';
 import { ServicesModule, API_CONFIG } from './services.module';
@@ -10,7 +10,12 @@ import {map, pluck, switchMap} from 'rxjs/internal/operators'
 import { Singer } from '../data-types/common.types';
 import queryString from 'query-string'
 
-
+export type SheetParams={
+  offset:number;
+  limit:number;
+  order:'new'|'hot';
+  cat:string;
+}
 
 @Injectable({
   providedIn: ServicesModule
@@ -27,5 +32,13 @@ export class SheetService {
   playSheet(id:number):Observable<Song[]>{
 
     return this.getSongSheetDetail(id).pipe(pluck('tracks'),switchMap(tracks=>this.songService.getSongList(tracks)))
+  }
+
+  getSheets(args:SheetParams):Observable<SheetList>{
+
+    const params=new HttpParams({fromString:queryString.stringify(args)})
+
+    return this.http.get(this.uri+'top/playList',{params}).pipe(map(res=>res as SheetList));
+
   }
 }
