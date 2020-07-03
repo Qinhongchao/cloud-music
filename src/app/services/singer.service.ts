@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import {map} from 'rxjs/internal/operators'
-import { Singer } from '../data-types/common.types';
+import { Singer, SingerDetail } from '../data-types/common.types';
 import queryString from 'query-string'
 
 type SingerParams={
@@ -30,5 +30,15 @@ export class SingerService {
   getEnterSinger(args?:SingerParams):Observable<Singer[]>{
     const params=new HttpParams({fromString:queryString.stringify(args)})
     return this.http.get(this.uri+'artist/list',{params}).pipe(map((res:{artists:Singer[]})=>res.artists.slice(0,10)));
+  }
+
+  getSingerDetail(id:string):Observable<SingerDetail>{
+    const params=new HttpParams().set('id',id);
+    return this.http.get(this.uri+'artists',{params}).pipe(map(res=>res as SingerDetail));
+  }
+
+  getSimiSinger(id:string):Observable<Singer[]>{
+    const params=new HttpParams().set('id',id);
+    return this.http.get(this.uri+'simi/artist',{params}).pipe(map((res:{artist:Singer[]})=>res.artist));
   }
 }

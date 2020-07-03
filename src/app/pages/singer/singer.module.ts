@@ -1,13 +1,16 @@
+import { ShareModule } from './../../share/share.module';
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 import { SingerRoutingModule } from './singer-routing.module';
+import { SingerDetailComponent } from './singer-detail/singer-detail.component';
+
+
 
 
 @NgModule({
-  declarations: [],
+  declarations: [SingerDetailComponent],
   imports: [
-    CommonModule,
+    ShareModule,
     SingerRoutingModule
   ]
 })

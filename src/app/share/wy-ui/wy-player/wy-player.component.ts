@@ -12,6 +12,7 @@ import { Song } from 'src/app/data-types/common.types';
 import { Subscription, fromEvent } from 'rxjs';
 import { shuffle, findIndex } from 'src/app/utils/array';
 import { NzModalService } from 'ng-zorro-antd';
+import { Router } from '@angular/router';
 
 const modelTypes: PlayMode[] = [
   {
@@ -72,7 +73,9 @@ export class WyPlayerComponent implements OnInit {
     private store$: Store<AppStoreModule>,
     @Inject(DOCUMENT) private doc: Document,
     private nzModalService:NzModalService,
-    private batchActionsService:BatchActionsService
+    private batchActionsService:BatchActionsService,
+    private router:Router
+
   ) {
 
     const appStore$ = this.store$.pipe(select(getPlayer));
@@ -238,25 +241,7 @@ export class WyPlayerComponent implements OnInit {
      this.bindFlag=false;
     }
   }
- /*  unbindDocumentClickListener() {
-    if (this.winClick) {
-      this.winClick.unsubscribe();
-      this.winClick = null;
-    }
-  } */
-/*   bindDocumentClickListener() {
-    if (!this.winClick) {
-      this.winClick = fromEvent(this.doc, 'click').subscribe(() => {
-        if (!this.selfClick) {
-          this.showVolumePanel = false;
-          this.showListPanel=false;
-          this.unbindDocumentClickListener();
-        }
 
-        this.selfClick = false;
-      })
-    }
-  } */
 
   changeMode() {
     const temp=modelTypes[++this.modeCount%3];
@@ -295,5 +280,13 @@ export class WyPlayerComponent implements OnInit {
     this.showVolumePanel=false;
     this.showListPanel=false;
     this.bindFlag=false;
+  }
+
+  toInfo(path:[string,number]){
+   
+    console.log('path',path);
+      this.showVolumePanel=false;
+      this.showPanel=false;
+      this.router.navigate(path);
   }
 }

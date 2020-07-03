@@ -34,6 +34,7 @@ export type SongSheet={
 export type Singer={
     id:string;
     name:string;
+    alias:string[];
     picUrl:string;
     albumSize:number;
 }
@@ -61,4 +62,9 @@ export type SheetList={
 
     playlists:SongSheet[];
     total:number;
+}
+
+export type SingerDetail={
+    artist:Singer;
+    hotSongs:Song[];
 }
