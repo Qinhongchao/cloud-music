@@ -1,3 +1,4 @@
+import { SearchService } from './services/search.service';
 import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
@@ -19,6 +20,7 @@ import { reducers, metaReducers } from './reducers';
     CoreModule,
     
   ],
+  providers:[SearchService],
   
   bootstrap: [AppComponent]
 })

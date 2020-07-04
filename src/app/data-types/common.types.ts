@@ -68,3 +68,11 @@ export type SingerDetail={
     artist:Singer;
     hotSongs:Song[];
 }
+
+export type SearchResult={
+    artist?:Singer[];
+    playlists?:SongSheet;
+    songs?:Song[];
+
+
+}

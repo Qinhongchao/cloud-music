@@ -2,17 +2,20 @@ import { BatchActionsService } from './../../../store/batch-actions.service';
 import { WyPlayerPanelComponent } from './wy-player-panel/wy-player-panel.component';
 
 import { DOCUMENT } from '@angular/common';
-import { SetCurrentIndex, SetPlayMode, SetPlayList, SetSongList } from './../../../store/actions/player.action';
+import { SetCurrentIndex, SetPlayMode, SetPlayList, SetSongList, SetCurrentAction } from './../../../store/actions/player.action';
 import { PlayMode } from './player.type';
-import { getSongList, getPlayList, getCurrentIndex, getCurrentSong, getPlayMode, getPlayer } from './../../../store/selectors/player.selector';
+import { getSongList, getPlayList, getCurrentIndex, getCurrentSong, getPlayMode, getPlayer, getCurrentAction } from './../../../store/selectors/player.selector';
 import { AppStoreModule } from './../../../store/index';
 import { Component, OnInit, ViewChild, ElementRef, Inject } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { Song } from 'src/app/data-types/common.types';
-import { Subscription, fromEvent } from 'rxjs';
+import { Subscription, fromEvent, timer } from 'rxjs';
 import { shuffle, findIndex } from 'src/app/utils/array';
 import { NzModalService } from 'ng-zorro-antd';
 import { Router } from '@angular/router';
+import { trigger, state, style, transition, animate,AnimationEvent } from '@angular/animations';
+import { CurrentAction } from 'src/app/store/reducers/player.reducer';
+import { R3TargetBinder } from '@angular/compiler';
 
 const modelTypes: PlayMode[] = [
   {
@@ -29,13 +32,38 @@ const modelTypes: PlayMode[] = [
   },
 ]
 
+enum TipTitles{
+  Add='已添加到列表',
+  Play='正在播放歌曲',
+  Delete='已删除歌曲',
+  Clear='已清空列表',
+}
+
 @Component({
   selector: 'app-wy-player',
   templateUrl: './wy-player.component.html',
-  styleUrls: ['./wy-player.component.less']
+  styleUrls: ['./wy-player.component.less'],
+  animations:[
+    trigger('showHide', [
+      state('show',style({bottom:0})),
+      state('hide',style({bottom:-71})),
+      transition('show=>hide',[animate('0.3s')]),
+      transition('hode=>show',[animate('0.2s')])
+    ]),
+   
+
+  ]
 })
 export class WyPlayerComponent implements OnInit {
+ 
 
+  isLocked=false;
+  showPlayer='hide';
+  animating=false;
+  controlTooltip={
+    title:'',
+    show:false,
+  }
   public percent = 0;
   public bufferPercent = 0;
   public songList: Song[];
@@ -84,6 +112,7 @@ export class WyPlayerComponent implements OnInit {
     appStore$.pipe(select(getCurrentIndex)).subscribe(index => this.watchCurrentIndex(index));
     appStore$.pipe(select(getPlayMode)).subscribe(mode => this.watchPlayMode(mode));
     appStore$.pipe(select(getCurrentSong)).subscribe(song => this.watchCurrentSong(song));
+    appStore$.pipe(select(getCurrentAction)).subscribe(currentAction=>this.watchCurrenAction(currentAction));
     
 
 
@@ -101,10 +130,44 @@ export class WyPlayerComponent implements OnInit {
   }
 
   watchCurrentSong(song: Song) {
-
+    this.currentSong = song;
     if (song) {
-      this.currentSong = song;
+      
       this.duration = song.dt / 1000;
+    }
+
+  }
+
+  watchCurrenAction(currentAction: CurrentAction): void {
+
+    const title=TipTitles[CurrentAction[currentAction]];
+    if(title){
+      this.controlTooltip.title=title;
+      if(this.showPlayer==='hide'){
+        this.togglePlayer("show");
+        this.showToolTip();
+      }else{
+        this.showToolTip();
+      }
+      
+    }
+
+    this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Other}))
+  }
+  showToolTip() {
+    this.controlTooltip.show=true;
+    timer(1500).subscribe(()=>{
+      this.controlTooltip={
+        title:'',
+        show:false
+      }
+    })
+  }
+
+  onAnimateDone(event:AnimationEvent){
+    this.animating=false;
+    if(event.toState==='show'&&this.controlTooltip.title){
+      this.showToolTip();
     }
 
   }
@@ -276,10 +339,15 @@ export class WyPlayerComponent implements OnInit {
     this.batchActionsService.deleteSong(song);
   }
 
-  onClickOutSide(){
-    this.showVolumePanel=false;
-    this.showListPanel=false;
-    this.bindFlag=false;
+  onClickOutSide(target:HTMLElement){
+
+    if(target.dataset.act!=='delete'){
+      this.showVolumePanel=false;
+      this.showListPanel=false;
+      this.bindFlag=false;
+    }
+
+    
   }
 
   toInfo(path:[string,number]){
@@ -288,5 +356,16 @@ export class WyPlayerComponent implements OnInit {
       this.showVolumePanel=false;
       this.showPanel=false;
       this.router.navigate(path);
+  }
+
+  togglePlayer(type:string){
+    if(!this.isLocked&&!this.animating){
+      this.showPlayer=type;
+    } 
+  }
+
+  onError(){
+    this.playing=false;
+    this.bufferPercent=0;
   }
 }

@@ -10,4 +10,5 @@ export const getCurrentIndex=createSelector(selectPlayerStates,(state:PlayState)
 export const getPlayMode=createSelector(selectPlayerStates,(state:PlayState)=>state.playMode);
 
 export const getCurrentSong=createSelector(selectPlayerStates,({playList,currentIndex}:PlayState)=>playList[currentIndex]);
-export const getPlayer=createFeatureSelector<PlayState>('player')
+export const getCurrentAction=createSelector(selectPlayerStates,(state:PlayState)=>state.currentAction);
+export const getPlayer=createFeatureSelector<PlayState>('player');

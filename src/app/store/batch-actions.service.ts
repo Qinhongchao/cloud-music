@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { Song } from '../data-types/common.types';
 import { Store, select } from '@ngrx/store';
 import { getPlayer } from './selectors/player.selector';
-import { PlayState } from './reducers/player.reducer';
-import { SetSongList, SetPlayList, SetCurrentIndex } from './actions/player.action';
+import { PlayState, CurrentAction } from './reducers/player.reducer';
+import { SetSongList, SetPlayList, SetCurrentIndex, SetCurrentAction } from './actions/player.action';
 import { shuffle, findIndex } from '../utils/array';
 
 @Injectable({
@@ -35,6 +35,7 @@ export class BatchActionsService {
 
     this.store$.dispatch(SetPlayList({ playList: trueList }));
     this.store$.dispatch(SetCurrentIndex({ currentIndex: trueIndex }));
+    this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Play}))
   }
 
   deleteSong(song: Song) {
@@ -52,6 +53,7 @@ export class BatchActionsService {
     this.store$.dispatch(SetSongList({ songList }));
     this.store$.dispatch(SetPlayList({ playList }));
     this.store$.dispatch(SetCurrentIndex({ currentIndex }));
+    this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Delete}))
   }
 
   clearSong() {
@@ -59,6 +61,7 @@ export class BatchActionsService {
     this.store$.dispatch(SetSongList({ songList: [] }));
     this.store$.dispatch(SetPlayList({ playList: [] }));
     this.store$.dispatch(SetCurrentIndex({ currentIndex: -1 }));
+    this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Clear}))
   }
 
   insertSong(song:Song,isPlay:boolean){
@@ -83,10 +86,14 @@ export class BatchActionsService {
 
       this.store$.dispatch(SetSongList({songList}));
       this.store$.dispatch(SetPlayList({playList}));
+      this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Add}))
     }
 
     if(insertIndex!=this.playerState.currentIndex){
       this.store$.dispatch(SetCurrentIndex({currentIndex:insertIndex}))
+      this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Play}))
+    }else{
+      this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Add}))
     }
     
   }
@@ -104,5 +111,6 @@ export class BatchActionsService {
 
     this.store$.dispatch(SetSongList({songList}));
       this.store$.dispatch(SetPlayList({playList}));
+      this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Add}))
   }
 }

@@ -1,7 +1,15 @@
-<div class="m-player"  appClickoutside  (onClickOutSide)="onClickOutSide()" [bindFlag]="bindFlag">
+<div class="m-player"  appClickoutside 
+[@showHide]="showPlayer"
+ (onClickOutSide)="onClickOutSide($event)" 
+ [bindFlag]="bindFlag" 
+  (mouseenter)="togglePlayer('show')"
+  (mouseleave)="togglePlayer('hide')"
+  (@showHide.start)="animating=true"
+  (@showHide.done)="onAnimateDone($event)"
+  >
   <div class="lock">
-    <div class="left">
-      <i class="lock"></i>
+    <div class="left" (click)="isLocked=!isLocked">
+      <i class="lock" [class.locked]="isLocked"></i>
     </div>
   </div>
   <div class="hand"></div>
@@ -53,7 +61,7 @@
           (click)="changeMode()"
         >
         </i>
-        <p class="open" (click)="toggleListPanel()">
+        <p class="open"   nz-tooltip [nzTitle]="controlTooltip.title"  [nzVisible]="controlTooltip.show"  nzOverlayClassName="tip-bg" (click)="toggleListPanel()">
           <span></span>
         </p>
         <div class="control-vol" [hidden]="!showVolumePanel">
@@ -84,5 +92,6 @@
     (canplay)="onCanplay()"
     (timeupdate)="onTimeUpdate($event)"
     (ended)="onEnded()"
+    (error)="onError()"
   ></audio>
 </div>
