@@ -1,3 +1,4 @@
+import { WyLayerModule } from './wy-layer/wy-layer.module';
 import { WySearchModule } from './wy-search/wy-search.module';
 import { WySliderModule } from './wy-slider/wy-slider.module';
 import { WyPlayerModule } from './wy-player/wy-player.module';
@@ -10,8 +11,9 @@ import { PlayCountPipe } from '../pipes/play-count.pipe';
   imports: [
    WyPlayerModule,
    WySliderModule,
-   WySearchModule
+   WySearchModule,
+   WyLayerModule
   ],
-  exports:[SingleSheetComponent,PlayCountPipe,WyPlayerModule,WySearchModule]
+  exports:[SingleSheetComponent,PlayCountPipe,WyPlayerModule,WySearchModule,WyLayerModule]
 })
 export class WyUiModule { }

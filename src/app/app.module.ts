@@ -1,3 +1,4 @@
+import { ShareModule } from './share/share.module';
 import { SearchService } from './services/search.service';
 import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
@@ -18,6 +19,7 @@ import { reducers, metaReducers } from './reducers';
   ],
   imports: [
     CoreModule,
+  
     
   ],
   providers:[SearchService],

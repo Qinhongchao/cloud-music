@@ -1,3 +1,5 @@
+import { SetModalType, SetModalVisible } from './actions/member.action';
+import { getMember } from './selectors/member.selector';
 import { AppStoreModule } from './index';
 import { Injectable } from '@angular/core';
 import { Song } from '../data-types/common.types';
@@ -6,6 +8,7 @@ import { getPlayer } from './selectors/player.selector';
 import { PlayState, CurrentAction } from './reducers/player.reducer';
 import { SetSongList, SetPlayList, SetCurrentIndex, SetCurrentAction } from './actions/player.action';
 import { shuffle, findIndex } from '../utils/array';
+import { MemberState, ModalTypes } from './reducers/member.reducer';
 
 @Injectable({
   providedIn: AppStoreModule
@@ -14,10 +17,16 @@ export class BatchActionsService {
 
   private playerState: PlayState;
 
+  private memberState:MemberState;
+
   constructor(private store$: Store<AppStoreModule>) {
 
     this.store$.pipe(select(getPlayer)).subscribe(playerState => {
       this.playerState = <PlayState>playerState;
+    })
+
+    this.store$.pipe(select(getMember)).subscribe(memberState=>{
+        this.memberState=<MemberState>memberState;
     })
   }
 
@@ -112,5 +121,11 @@ export class BatchActionsService {
     this.store$.dispatch(SetSongList({songList}));
       this.store$.dispatch(SetPlayList({playList}));
       this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Add}))
+  }
+
+
+  controlModal(modalVisible=true,modalType=ModalTypes.Default){
+    this.store$.dispatch(SetModalType({modalType}));
+    this.store$.dispatch(SetModalVisible({modalVisible}));
   }
 }
