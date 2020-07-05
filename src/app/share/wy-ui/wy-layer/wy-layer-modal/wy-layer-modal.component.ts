@@ -25,7 +25,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 })
 export class WyLayerModalComponent implements OnInit, AfterViewInit {
   private visible: boolean = false;
-  private currentModalType: ModalTypes = ModalTypes.Default;
+  public currentModalType: ModalTypes = ModalTypes.Default;
   private overlayRef: OverlayRef;
 
   public showModal:'show'|'hide'= 'hide';
@@ -136,6 +136,7 @@ export class WyLayerModalComponent implements OnInit, AfterViewInit {
   watchModalType(type: ModalTypes) {
     if (this.currentModalType !== type) {
       this.currentModalType = type;
+      this.cdr.markForCheck();
     }
 
   }

@@ -1,54 +1,76 @@
 <div id="app">
-    <nz-layout class="layout">
-      <nz-header class="header">
-        <div class="wrap">
-          <div class="left">
-            <h1>Music</h1>
-            <ul nz-menu nzTheme="dark" nzMode="horizontal">
-              <li nz-menu-item *ngFor="let item of menu" [routerLink]="item.path">{{item.label}}</li>
-          
-            </ul>
-          </div>
-          <div class="right">
-          <app-wy-search (onSearch)="onSearch($event)" [searchResult]="searchResult">
-          </app-wy-search>
-          
+  <nz-layout class="layout">
+    <nz-header class="header">
+      <div class="wrap">
+        <div class="left">
+          <h1>Music</h1>
+          <ul nz-menu nzTheme="dark" nzMode="horizontal">
+            <li nz-menu-item *ngFor="let item of menu" [routerLink]="item.path">{{item.label}}</li>
+          </ul>
+        </div>
+        <div class="right">
+          <app-wy-search (onSearch)="onSearch($event)" [searchResult]="searchResult"></app-wy-search>
           
 
-            <div class="member">
-              <div class="no-login">
-                <ul nz-menu nzTheme="dark" nzMode="horizontal">
+          <div class="member">
+            <div class="no-login" *ngIf="!user else logined">
+              <ul nz-menu nzTheme="dark" nzMode="horizontal">
+                <li nz-submenu>
+                  <div title>
+                    <span>登陆</span>
+                    <i nz-icon type="down" nzTheme="outline"></i>
+                  </div>
+                  <ul>
+                    <li nz-menu-item (click)="openModal('loginByPhone')">
+                      <i nz-icon type="mobile" nzTheme="outline"></i>
+                      手机登陆
+                    </li>
+                    <li nz-menu-item (click)="openModal('register')">
+                      <i nz-icon type="user-add" nzTheme="outline"></i>
+                      注册
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+
+            <ng-template #logined>
+              <div class="login">
+                <ul nz-menu nzMode="horizontal" nzTheme="dark">
                   <li nz-submenu>
                     <div title>
-                      <span>登陆</span>
+                      <nz-avatar nzIcon="user" [nzSrc]="user.profile.avatarUrl"></nz-avatar>
                       <i nz-icon type="down" nzTheme="outline"></i>
                     </div>
                     <ul>
                       <li nz-menu-item>
-                        <i nz-icon type="mobile" nzTheme="outline"></i>
-                        手机登陆
+                        <i nz-icon nzType="user" nzTheme="outline"></i>我的主页
                       </li>
-                      <li nz-menu-item>
-                        <i nz-icon type="user-add" nzTheme="outline"></i>
-                        注册
+                      <li nz-menu-item (click)="onLogout()">
+                        <i nz-icon nzType="close-circle" nzTheme="outline"></i>退出
                       </li>
                     </ul>
                   </li>
                 </ul>
               </div>
-            </div>
+            </ng-template>
+
           </div>
         </div>
-      </nz-header>
-      <nz-content class="content">
-        <router-outlet></router-outlet>
-      </nz-content>
-      <nz-footer class="footer">
-        Ant Design ©2019 Implement By Angular
-      </nz-footer>
-    </nz-layout>
-  </div>
+      </div>
+    </nz-header>
+    <nz-content class="content">
+      <router-outlet></router-outlet>
+    </nz-content>
+    <nz-footer class="footer">
+      Ant Design ©2019 Implement By Angular
+    </nz-footer>
+  </nz-layout>
+</div>
+
 <app-wy-player></app-wy-player>
+
 <app-wy-layer-modal>
-  <app-wy-layer-default></app-wy-layer-default> 
+  <app-wy-layer-login name="login"  [wyRememberLogin]="wyRememberLogin" (onLogin)="onLogin($event)" (onChangeModalType)="onChangeModalType($event)"></app-wy-layer-login>
+  <app-wy-layer-default name="default" (onChangeModalType)="onChangeModalType($event)"></app-wy-layer-default>
 </app-wy-layer-modal>

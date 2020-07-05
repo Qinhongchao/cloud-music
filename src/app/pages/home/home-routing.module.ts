@@ -1,4 +1,4 @@
-import { HomeResolveService } from './components/home-resolve.service';
+import { HomeResolveService } from './home-resolve.service';
 
 import { HomeComponent } from './home.component';
 import { NgModule } from '@angular/core';

@@ -1,3 +1,4 @@
+
 import { SetModalType, SetModalVisible } from './actions/member.action';
 import { getMember } from './selectors/member.selector';
 import { AppStoreModule } from './index';
@@ -124,8 +125,12 @@ export class BatchActionsService {
   }
 
 
-  controlModal(modalVisible=true,modalType=ModalTypes.Default){
-    this.store$.dispatch(SetModalType({modalType}));
+  controlModal(modalVisible=true,modalType?:ModalTypes){
+
+    if(modalType){
+      this.store$.dispatch(SetModalType({modalType}));
+    }
+    
     this.store$.dispatch(SetModalVisible({modalVisible}));
   }
 }

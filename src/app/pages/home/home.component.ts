@@ -1,3 +1,4 @@
+import { getMember, getUserId } from './../../store/selectors/member.selector';
 import { BatchActionsService } from './../../store/batch-actions.service';
 import { getPlayer } from './../../store/selectors/player.selector';
 import { shuffle, findIndex } from 'src/app/utils/array';
@@ -14,6 +15,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs/internal/operators';
 import { Store, select } from '@ngrx/store';
 import { PlayState } from 'src/app/store/reducers/player.reducer';
+import { ModalTypes } from 'src/app/store/reducers/member.reducer';
+import { StorageService } from 'src/app/services/storage.service';
+import { User } from 'src/app/data-types/member.types';
+import { MemberService } from 'src/app/services/member.service';
 
 @Component({
   selector: 'app-home',
@@ -22,12 +27,16 @@ import { PlayState } from 'src/app/store/reducers/player.reducer';
 })
 export class HomeComponent implements OnInit {
 
+
+ 
+
   carouselActiveIndex = 0;
   banners: Banner[];
   hotTags:HotTag[];
   songSheetList:SongSheet[];
   singers:Singer[];
   private playerState:PlayState;
+  user: User;
 
   @ViewChild(NzCarouselComponent, { static: true }) private nzCarousel: NzCarouselComponent
 
@@ -36,22 +45,36 @@ export class HomeComponent implements OnInit {
     private router:Router,
     private sheetService:SheetService,
     private batchActionsService:BatchActionsService,
+    private store$:Store<AppStoreModule>,
+    private memberServe:MemberService
 
     ) {
 
     this.route.data.pipe(map(res=>res.homeDatas)).subscribe(
-      ([banners,hotTags,songSheetList,singers])=>{
+      ([banners,hotTags,songSheetList,singers,user])=>{
         this.banners=banners;
         this.hotTags=hotTags;
         this.songSheetList=songSheetList;
         this.singers=singers;
+        
       }
     )
 
- 
+   this.store$.pipe(select(getMember),select(getUserId)).subscribe(id=>{
+     if(id){
+       this.getUserDetail(id);
+     }else{
+       this.user=null;
+     }
+   })
 
   }
 
+  getUserDetail(id: string) {
+    this.memberServe.getUserDetail(id).subscribe(user=>{
+      this.user=user;
+    })
+  }
 
   ngOnInit(): void {
   }
@@ -74,7 +97,7 @@ export class HomeComponent implements OnInit {
   }
 
   openModal(){
-    this.batchActionsService.controlModal();
+    this.batchActionsService.controlModal(true,ModalTypes.Default);
   }
 
 }

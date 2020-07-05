@@ -1,4 +1,4 @@
-import { SetModalVisible, SetModalType } from './../actions/member.action';
+import { SetModalVisible, SetModalType, SetUserId } from './../actions/member.action';
 import { SetPlaying, SetPlayList, SetSongList, SetPlayMode, SetCurrentIndex, SetCurrentAction } from '../actions/player.action';
 import { PlayMode } from 'src/app/share/wy-ui/wy-player/player.type';
 import { Song } from 'src/app/data-types/common.types';
@@ -17,6 +17,7 @@ export enum ModalTypes{
 export type MemberState={
     modalVisible:boolean;
     modalType:ModalTypes;
+    userId:string;
 
 }
 
@@ -25,7 +26,8 @@ export type MemberState={
 export const  initialState:MemberState={
 
     modalVisible:false,
-    modalType:ModalTypes.Default
+    modalType:ModalTypes.Default,
+    userId:'',
 
 }
 
@@ -33,6 +35,7 @@ const reducer=createReducer(
     initialState,
     on(SetModalVisible,(state,{modalVisible})=>({...state,modalVisible})),
     on(SetModalType,(state,{modalType})=>({...state,modalType})),
+    on(SetUserId,(state,{userId})=>({...state,userId}))
     
     
     

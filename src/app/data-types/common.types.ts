@@ -76,3 +76,12 @@ export type SearchResult={
 
 
 }
+
+export interface AnyJson{
+    [key:string]:any;
+}
+
+export interface SampleBack extends AnyJson{
+    code:number;
+} 
+
