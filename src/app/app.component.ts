@@ -119,7 +119,7 @@ export class AppComponent {
 
       }
     },error=>{
-      this.alertMessage('error',error.error.message||'登录失败');
+      this.alertMessage('error',error.message||'登录失败');
     })
 
   }
@@ -137,7 +137,7 @@ export class AppComponent {
       this.alertMessage('success','退出成功');
 
     },
-    ({error})=>{
+    (error)=>{
       this.alertMessage('error',error.message||'退出失败')
     }
     )
