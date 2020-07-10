@@ -8,14 +8,19 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Banner, HotTag ,SongSheet} from '../data-types/common.types';
 import {map} from 'rxjs/internal/operators'
-import { User, Signin } from '../data-types/member.types';
+import { User, Signin, recordVal, UserRecord, UserSheet } from '../data-types/member.types';
+
+export enum RecordType{
+  allData,
+  weekData
+}
+
+const records=['allData','weekData'];
+
 @Injectable({
   providedIn: ServicesModule
 })
 export class MemberService {
-
-
- 
 
    // 获取用户详情
    getUserDetail(uid: string): Observable<User> {
@@ -40,6 +45,24 @@ export class MemberService {
 
     const params=new HttpParams({fromString:queryString.stringify({type:1})});
     return this.http.get(this.uri+'daily_signin',{params}).pipe(map(res=>res as Signin))
+  }
+
+  getUserRecord(uid:string,type=RecordType.weekData):Observable<recordVal[]>{
+
+      const params =new HttpParams({fromString:queryString.stringify({uid,type})});
+      return this.http.get(this.uri+'user/record',{params}).pipe(map((res:UserRecord)=>{return res[RecordType[type]]}));
+
+  }
+
+  getUserSheets(uid:string):Observable<UserSheet>{
+    const params =new HttpParams({fromString:queryString.stringify({uid})});
+      return this.http.get(this.uri+'user/playlist',{params}).pipe(map((res:{playlist:SongSheet[]})=>{
+        const list= res.playlist;
+        return {
+          self:list.filter(item=>!item.subscribed),
+          subscribed:list.filter(item=>item.subscribed)
+        }
+      }));
   }
  
 

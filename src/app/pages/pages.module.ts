@@ -5,6 +5,7 @@ import { SheetListModule } from './sheet-list/sheet-list.module';
 import { HomeModule } from './home/home.module';
 
 import { NgModule } from '@angular/core';
+import { MemberModule } from './member/member.module';
 
 @NgModule({
   declarations: [],
@@ -13,14 +14,16 @@ import { NgModule } from '@angular/core';
     SheetListModule,
     SheetInfoModule,
     SongInfoModule,
-    SingerModule
+    SingerModule,
+    MemberModule,
   ],
   exports:[
     HomeModule,
     SheetListModule,
     SheetInfoModule,
     SongInfoModule,
-    SingerModule
+    SingerModule,
+    MemberModule
   ]
 })
 export class PagesModule { }
