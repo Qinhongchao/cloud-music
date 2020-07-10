@@ -1,3 +1,4 @@
+import { MemberService } from 'src/app/services/member.service';
 import { findIndex } from 'src/app/utils/array';
 import { BatchActionsService } from './../../store/batch-actions.service';
 import { getPlayer, getCurrentSong } from './../../store/selectors/player.selector';
@@ -9,6 +10,8 @@ import { map, takeUntil } from 'rxjs/internal/operators';
 import { Store, select } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { SongService } from 'src/app/services/song.service';
+
+import { ModalTypes } from 'src/app/store/reducers/member.reducer';
 import { NzMessageService } from 'ng-zorro-antd';
 
 @Component({
@@ -42,7 +45,9 @@ export class SheetInfoComponent implements OnInit,OnDestroy {
     private store$:Store<AppStoreModule>,
     private songServe:SongService,
     private batchActionServe:BatchActionsService,
-    private nzMessageServe:NzMessageService
+    private messageServe:NzMessageService,
+    private memberServe:MemberService,
+   
     ) {
 
     this.route.data.pipe(map(res=>res.sheetInfo)).subscribe(res=>{
@@ -112,7 +117,7 @@ export class SheetInfoComponent implements OnInit,OnDestroy {
           if(list.length){
             this.batchActionServe.insertSong(list[0],isPlay);
           }else{
-            this.nzMessageServe.create('warning','无URL!');
+            this.messageServe.create('warning','无URL!');
           }
           
         }
@@ -139,5 +144,25 @@ export class SheetInfoComponent implements OnInit,OnDestroy {
         alert('无URL');
       }
     })
+  }
+
+  onLikeSong(id:string){
+
+ 
+  this.batchActionServe.likeSong(id);
+
+  }
+
+  onLikeSheet(id:string){
+    this.memberServe.likeSheet(id).subscribe(()=>{
+      this.batchActionServe.controlModal(false);
+      this.alertMessage('success','收藏成功');
+    },error=>{
+      this.alertMessage('error',error.msg||'收藏失败');
+    })
+  }
+
+  alertMessage(type:string,msg:string) {
+    this.messageServe.create(type,msg);
   }
 }

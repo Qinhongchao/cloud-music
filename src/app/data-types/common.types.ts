@@ -27,6 +27,7 @@ export type SongSheet={
     commentCount:number;
     subscribed:boolean;
     userId:string;
+    trackCount:number;
 
 
 }

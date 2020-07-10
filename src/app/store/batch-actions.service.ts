@@ -1,5 +1,6 @@
+import { timer } from 'rxjs';
 
-import { SetModalType, SetModalVisible } from './actions/member.action';
+import { SetModalType, SetModalVisible, SetLikeId } from './actions/member.action';
 import { getMember } from './selectors/member.selector';
 import { AppStoreModule } from './index';
 import { Injectable } from '@angular/core';
@@ -132,5 +133,16 @@ export class BatchActionsService {
     }
     
     this.store$.dispatch(SetModalVisible({modalVisible}));
+
+    if(!modalVisible){
+     timer(500).subscribe(()=>{
+      this.store$.dispatch(SetModalType({modalType:ModalTypes.Default}))
+     }) 
+    }
+  }
+
+  likeSong(id:string){
+    this.store$.dispatch(SetModalType({modalType:ModalTypes.Like}));
+    this.store$.dispatch(SetLikeId({likeId:id}));
   }
 }

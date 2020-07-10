@@ -1,3 +1,4 @@
+
 import { SampleBack } from './../data-types/common.types';
 import queryString from 'query-string';
 import { LoginParams } from './../share/wy-ui/wy-layer/wy-layer-login/wy-layer-login.component';
@@ -13,6 +14,11 @@ import { User, Signin, recordVal, UserRecord, UserSheet } from '../data-types/me
 export enum RecordType{
   allData,
   weekData
+}
+
+export type LikeSongParams={
+  pid:string;
+  tracks:string;
 }
 
 const records=['allData','weekData'];
@@ -63,6 +69,22 @@ export class MemberService {
           subscribed:list.filter(item=>item.subscribed)
         }
       }));
+  }
+
+  likeSong({pid,tracks}:LikeSongParams):Observable<number>{
+    const params =new HttpParams({fromString:queryString.stringify({pid,tracks,op:'add'})});
+    return this.http.get(this.uri+'playlist/tracks',{params}).pipe(map((res:SampleBack)=>res.code));
+
+  }
+
+  createSheet(name:string):Observable<string>{
+    const params =new HttpParams({fromString:queryString.stringify({name})});
+    return this.http.get(this.uri+'playlist/create',{params}).pipe(map((res:SampleBack)=>res.id.toString()));
+  }
+
+  likeSheet(id:string,t=1):Observable<number>{
+    const params =new HttpParams({fromString:queryString.stringify({id,t})});
+    return this.http.get(this.uri+'playlist/subscribe',{params}).pipe(map((res:SampleBack)=>res.code))
   }
  
 
