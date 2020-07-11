@@ -79,8 +79,13 @@ export class AppComponent {
 
     this.store$.pipe(select(getMember),select(getShareInfo)).subscribe(shareInfo=>{
       if(shareInfo){
-        this.shareInfo=shareInfo;
-       this.openModal(ModalTypes.Share);
+        if(this.user){
+          this.shareInfo=shareInfo;
+          this.openModal(ModalTypes.Share);
+        }else{
+          this.openModal(ModalTypes.Default);
+        }
+       
       }
     })
   
