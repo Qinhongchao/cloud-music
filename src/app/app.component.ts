@@ -1,19 +1,20 @@
-import { getMember, getLikeId, getModalVisible, getModalType } from './store/selectors/member.selector';
+import { getMember, getLikeId, getModalVisible, getModalType, getShareInfo } from './store/selectors/member.selector';
 import { StorageService } from './services/storage.service';
 import { NzMessageService } from 'ng-zorro-antd';
 import { LoginParams } from './share/wy-ui/wy-layer/wy-layer-login/wy-layer-login.component';
 import { BatchActionsService } from 'src/app/store/batch-actions.service';
 import { SetModalType, SetUserId, SetModalVisible } from './store/actions/member.action';
-import { ModalTypes } from 'src/app/store/reducers/member.reducer';
+import { ModalTypes, ShareInfo } from 'src/app/store/reducers/member.reducer';
 import { isEmptyObject } from 'src/app/utils/tools';
 import { SearchResult, SongSheet } from './data-types/common.types';
 import { SearchService } from './services/search.service';
 import { Component } from '@angular/core';
 import { AppStoreModule } from './store';
 import { Store, select } from '@ngrx/store';
-import { MemberService, LikeSongParams } from './services/member.service';
+import { MemberService, LikeSongParams, ShareParams } from './services/member.service';
 import { User } from './data-types/member.types';
 import { codeJson } from './utils/base64';
+import { takeUntil } from 'rxjs/internal/operators';
 
 @Component({
   selector: 'app-root',
@@ -41,6 +42,7 @@ export class AppComponent {
   likeId: string;
   modalVisible: boolean;
   modalType: ModalTypes;
+  shareInfo: ShareInfo;
 
 
   constructor(
@@ -74,7 +76,17 @@ export class AppComponent {
     this.store$.pipe(select(getMember),select(getLikeId)).subscribe(likeId=>{
       this.likeId=likeId;
     })
+
+    this.store$.pipe(select(getMember),select(getShareInfo)).subscribe(shareInfo=>{
+      if(shareInfo){
+        this.shareInfo=shareInfo;
+       this.openModal(ModalTypes.Share);
+      }
+    })
   
+  }
+  destroy$(destroy$: any): import("rxjs").OperatorFunction<import("./store/reducers/member.reducer").ShareInfo, import("./store/reducers/member.reducer").ShareInfo> {
+    throw new Error("Method not implemented.");
   }
 
 
@@ -215,6 +227,24 @@ export class AppComponent {
    },error=>{
      this.alertMessage('error',error.msg||"新建歌单失败");
    })
+  }
+
+  closeModal(){
+    this.batchActionsService.controlModal(false);
+  }
+
+  onCancel(){
+    this.closeModal();
+  }
+
+
+  onShare(shareParam:ShareParams){
+    this.memberServe.shareResource(shareParam).subscribe(()=>{
+      this.batchActionsService.controlModal(false);
+      this.alertMessage('success','分享成功');
+    },error=>{
+      this.alertMessage('error',error.msg||'分享失败');
+    })
   }
 
 

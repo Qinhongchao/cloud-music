@@ -8,14 +8,15 @@ import { getSongList, getPlayList, getCurrentIndex, getCurrentSong, getPlayMode,
 import { AppStoreModule } from './../../../store/index';
 import { Component, OnInit, ViewChild, ElementRef, Inject } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { Song } from 'src/app/data-types/common.types';
+import { Song, SongSheet, Singer } from 'src/app/data-types/common.types';
 import { Subscription, fromEvent, timer } from 'rxjs';
 import { shuffle, findIndex } from 'src/app/utils/array';
 import { NzModalService } from 'ng-zorro-antd';
 import { Router } from '@angular/router';
-import { trigger, state, style, transition, animate,AnimationEvent } from '@angular/animations';
+import { trigger, state, style, transition, animate, AnimationEvent } from '@angular/animations';
 import { CurrentAction } from 'src/app/store/reducers/player.reducer';
 import { R3TargetBinder } from '@angular/compiler';
+import { SetShareInfo } from 'src/app/store/actions/member.action';
 
 const modelTypes: PlayMode[] = [
   {
@@ -32,37 +33,37 @@ const modelTypes: PlayMode[] = [
   },
 ]
 
-enum TipTitles{
-  Add='已添加到列表',
-  Play='正在播放歌曲',
-  Delete='已删除歌曲',
-  Clear='已清空列表',
+enum TipTitles {
+  Add = '已添加到列表',
+  Play = '正在播放歌曲',
+  Delete = '已删除歌曲',
+  Clear = '已清空列表',
 }
 
 @Component({
   selector: 'app-wy-player',
   templateUrl: './wy-player.component.html',
   styleUrls: ['./wy-player.component.less'],
-  animations:[
+  animations: [
     trigger('showHide', [
-      state('show',style({bottom:0})),
-      state('hide',style({bottom:-71})),
-      transition('show=>hide',[animate('0.3s')]),
-      transition('hode=>show',[animate('0.2s')])
+      state('show', style({ bottom: 0 })),
+      state('hide', style({ bottom: -71 })),
+      transition('show=>hide', [animate('0.3s')]),
+      transition('hode=>show', [animate('0.2s')])
     ]),
-   
+
 
   ]
 })
 export class WyPlayerComponent implements OnInit {
- 
 
-  isLocked=false;
-  showPlayer='hide';
-  animating=false;
-  controlTooltip={
-    title:'',
-    show:false,
+
+  isLocked = false;
+  showPlayer = 'hide';
+  animating = false;
+  controlTooltip = {
+    title: '',
+    show: false,
   }
   public percent = 0;
   public bufferPercent = 0;
@@ -75,12 +76,12 @@ export class WyPlayerComponent implements OnInit {
   public currentTime: number;
   public volume: number = 5;
   public showVolumePanel = false;
-  public showListPanel=false;
+  public showListPanel = false;
   public bindFlag = false;
   public winClick: Subscription;
   public currentMode: PlayMode;
-  public modeCount=0;
-  public showPanel:boolean=false;
+  public modeCount = 0;
+  public showPanel: boolean = false;
 
   public playing = false;
   public songReady = false;
@@ -100,9 +101,10 @@ export class WyPlayerComponent implements OnInit {
   constructor(
     private store$: Store<AppStoreModule>,
     @Inject(DOCUMENT) private doc: Document,
-    private nzModalService:NzModalService,
-    private batchActionsService:BatchActionsService,
-    private router:Router
+    private nzModalService: NzModalService,
+    private batchActionsService: BatchActionsService,
+    private router: Router,
+    private batchActionServe: BatchActionsService,
 
   ) {
 
@@ -112,8 +114,8 @@ export class WyPlayerComponent implements OnInit {
     appStore$.pipe(select(getCurrentIndex)).subscribe(index => this.watchCurrentIndex(index));
     appStore$.pipe(select(getPlayMode)).subscribe(mode => this.watchPlayMode(mode));
     appStore$.pipe(select(getCurrentSong)).subscribe(song => this.watchCurrentSong(song));
-    appStore$.pipe(select(getCurrentAction)).subscribe(currentAction=>this.watchCurrenAction(currentAction));
-    
+    appStore$.pipe(select(getCurrentAction)).subscribe(currentAction => this.watchCurrenAction(currentAction));
+
 
 
   }
@@ -132,7 +134,7 @@ export class WyPlayerComponent implements OnInit {
   watchCurrentSong(song: Song) {
     this.currentSong = song;
     if (song) {
-      
+
       this.duration = song.dt / 1000;
     }
 
@@ -140,57 +142,57 @@ export class WyPlayerComponent implements OnInit {
 
   watchCurrenAction(currentAction: CurrentAction): void {
 
-    const title=TipTitles[CurrentAction[currentAction]];
-    if(title){
-      this.controlTooltip.title=title;
-      if(this.showPlayer==='hide'){
+    const title = TipTitles[CurrentAction[currentAction]];
+    if (title) {
+      this.controlTooltip.title = title;
+      if (this.showPlayer === 'hide') {
         this.togglePlayer("show");
         this.showToolTip();
-      }else{
+      } else {
         this.showToolTip();
       }
-      
+
     }
 
-    this.store$.dispatch(SetCurrentAction({currentAction:CurrentAction.Other}))
+    this.store$.dispatch(SetCurrentAction({ currentAction: CurrentAction.Other }))
   }
   showToolTip() {
-    this.controlTooltip.show=true;
-    timer(1500).subscribe(()=>{
-      this.controlTooltip={
-        title:'',
-        show:false
+    this.controlTooltip.show = true;
+    timer(1500).subscribe(() => {
+      this.controlTooltip = {
+        title: '',
+        show: false
       }
     })
   }
 
-  onAnimateDone(event:AnimationEvent){
-    this.animating=false;
-    if(event.toState==='show'&&this.controlTooltip.title){
+  onAnimateDone(event: AnimationEvent) {
+    this.animating = false;
+    if (event.toState === 'show' && this.controlTooltip.title) {
       this.showToolTip();
     }
 
   }
   watchPlayMode(mode: PlayMode) {
     this.currentMode = mode;
-    if(this.songList){
-      let list=this.songList.slice();
-      if(mode.type==='random'){
-        list=shuffle(this.songList);
-       
+    if (this.songList) {
+      let list = this.songList.slice();
+      if (mode.type === 'random') {
+        list = shuffle(this.songList);
+
       }
 
-      this.updateCurrentIndex(list,this.currentSong);
-      this.store$.dispatch(SetPlayList({playList:list}))
-      
+      this.updateCurrentIndex(list, this.currentSong);
+      this.store$.dispatch(SetPlayList({ playList: list }))
+
     }
   }
   updateCurrentIndex(list: Song[], song: Song) {
-    const newIndex=findIndex(list,song);
-    this.store$.dispatch(SetCurrentIndex({currentIndex:newIndex}));
+    const newIndex = findIndex(list, song);
+    this.store$.dispatch(SetCurrentIndex({ currentIndex: newIndex }));
   }
 
- onCanplay() {
+  onCanplay() {
     this.songReady = true;
     this.play();
   }
@@ -267,12 +269,12 @@ export class WyPlayerComponent implements OnInit {
   onPercentChange(percent: number) {
     if (this.currentSong) {
 
-      const currentTime=this.duration * (percent / 100)
+      const currentTime = this.duration * (percent / 100)
       this.audioEl.currentTime = currentTime;
-      if(this.playerPanel){
-        this.playerPanel.seekLyric(currentTime*1000);
+      if (this.playerPanel) {
+        this.playerPanel.seekLyric(currentTime * 1000);
       }
-      
+
     }
 
   }
@@ -283,89 +285,115 @@ export class WyPlayerComponent implements OnInit {
   }
 
   toggleVolPanel() {
-    
+
     this.togglePanel('showVolumePanel');
   }
 
   toggleListPanel() {
-    
-    if(this.songList.length){
+
+    if (this.songList.length) {
       this.togglePanel('showListPanel');
     }
-    
+
   }
 
-  togglePanel(type:string) {
+  togglePanel(type: string) {
 
     this[type] = !this[type];
-    if (this.showVolumePanel||this.showListPanel) {
-      this.bindFlag=true;
+    if (this.showVolumePanel || this.showListPanel) {
+      this.bindFlag = true;
     } else {
-     this.bindFlag=false;
+      this.bindFlag = false;
     }
   }
 
 
   changeMode() {
-    const temp=modelTypes[++this.modeCount%3];
-    this.store$.dispatch(SetPlayMode({playMode:temp}))
+    const temp = modelTypes[++this.modeCount % 3];
+    this.store$.dispatch(SetPlayMode({ playMode: temp }))
   }
 
-  onEnded(){
-    this.playing=false;
-    if(this.currentMode.type==='singleLoop'){
+  onEnded() {
+    this.playing = false;
+    if (this.currentMode.type === 'singleLoop') {
       this.loop();
-    }else{
-      this.onNext(this.currentIndex=1);
+    } else {
+      this.onNext(this.currentIndex = 1);
     }
   }
 
-  onChangeSong(song:Song){
-    this.updateCurrentIndex(this.playList,song);
+  onChangeSong(song: Song) {
+    this.updateCurrentIndex(this.playList, song);
   }
 
-  onClearSong(event:any){
+  onClearSong(event: any) {
 
     this.nzModalService.confirm({
-      nzTitle:'确认删除列表？',
-      nzOnOk:()=>{
-       this.batchActionsService.clearSong();
+      nzTitle: '确认删除列表？',
+      nzOnOk: () => {
+        this.batchActionsService.clearSong();
       }
     })
-   
+
   }
 
-  onDeleteSong(song:Song){
+  onDeleteSong(song: Song) {
     this.batchActionsService.deleteSong(song);
   }
 
-  onClickOutSide(target:HTMLElement){
+  onClickOutSide(target: HTMLElement) {
 
-    if(target.dataset.act!=='delete'){
-      this.showVolumePanel=false;
-      this.showListPanel=false;
-      this.bindFlag=false;
+    if (target.dataset.act !== 'delete') {
+      this.showVolumePanel = false;
+      this.showListPanel = false;
+      this.bindFlag = false;
     }
 
-    
+
   }
 
-  toInfo(path:[string,number]){
-   
-    console.log('path',path);
-      this.showVolumePanel=false;
-      this.showPanel=false;
-      this.router.navigate(path);
+  toInfo(path: [string, number]) {
+
+    console.log('path', path);
+    this.showVolumePanel = false;
+    this.showPanel = false;
+    this.router.navigate(path);
   }
 
-  togglePlayer(type:string){
-    if(!this.isLocked&&!this.animating){
-      this.showPlayer=type;
-    } 
+  togglePlayer(type: string) {
+    if (!this.isLocked && !this.animating) {
+      this.showPlayer = type;
+    }
   }
 
-  onError(){
-    this.playing=false;
-    this.bufferPercent=0;
+  onError() {
+    this.playing = false;
+    this.bufferPercent = 0;
+  }
+
+  onLikeSong(id: string) {
+
+
+    this.batchActionServe.likeSong(id);
+
+  }
+
+  onShareSong(resource: Song , type = 'song') {
+    let txt = '';
+      txt = this.makeTxt('歌曲', resource.name, (<Song>resource).ar);
+    this.store$.dispatch(SetShareInfo({ shareInfo: { id: resource.id.toString(), type, txt } }));
+  }
+  makeTxt(type: string, name: string, makeBy: string | Singer[]): string {
+
+    let makeByStr = '';
+
+    if (Array.isArray(makeBy)) {
+      makeByStr = makeBy.map(item => item.name).join('/');
+    } else {
+      makeByStr = makeBy;
+    }
+
+    return `${type}:${name}--${makeByStr}`;
+
   }
 }

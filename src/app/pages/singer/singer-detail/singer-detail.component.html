@@ -9,7 +9,7 @@
                 <div class="cover-img">
                     <img [src]="singerDetail.artist.picUrl" alt="singerDetail.artist.name" class="full-height">
                 </div>
-                <button class="btn btn-like"></button>
+                <button class="btn btn-like" [class.btn-liked]="hasLiked" (click)="onLikeSinger(singerDetail.artist.id)"></button>
             </div>
             <div class="top-50">
                 <div class="btns clearfix">
@@ -19,7 +19,7 @@
                         </button>
                         <button class="add" nz-button nzType="primary" (click)="onAddSongs(singerDetail.hotSongs,false)">+</button>
                       </nz-button-group>
-                      <button class="btn like" nz-button><span>收藏</span>{{singerDetail.hotSongs.length}}</button>
+                      <button class="btn like" nz-button (click)="onLikeSongs(singerDetail.hotSongs)"><span>收藏</span>{{singerDetail.hotSongs.length}}</button>
                 </div>
                 <nz-table class="wy-table" #basicTable [nzData]="singerDetail.hotSongs" 
                 [nzFrontPagination]="false" nzBordered nzNoResult="暂无音乐！">

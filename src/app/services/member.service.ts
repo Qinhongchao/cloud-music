@@ -20,6 +20,11 @@ export type LikeSongParams={
   pid:string;
   tracks:string;
 }
+export type ShareParams={
+  id:string;
+  msg:string;
+  type:string;
+}
 
 const records=['allData','weekData'];
 
@@ -86,6 +91,20 @@ export class MemberService {
     const params =new HttpParams({fromString:queryString.stringify({id,t})});
     return this.http.get(this.uri+'playlist/subscribe',{params}).pipe(map((res:SampleBack)=>res.code))
   }
+
+  shareResource({id,msg,type}:ShareParams):Observable<number>{
+    const params =new HttpParams({fromString:queryString.stringify({id,msg,type})});
+    return this.http.get(this.uri+'share/resource',{params}).pipe(map((res:SampleBack)=>res.code));
+
+  }
+
+  likeSinger(id:string,t=1):Observable<number>{
+    const params =new HttpParams({fromString:queryString.stringify({id,t})});
+    return this.http.get(this.uri+'artist/sub',{params}).pipe(map((res:SampleBack)=>res.code))
+  }
+
+
+
  
 
 }

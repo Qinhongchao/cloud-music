@@ -1,3 +1,4 @@
+import { MemberService } from 'src/app/services/member.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { map, takeUntil } from 'rxjs/internal/operators';
@@ -21,13 +22,15 @@ export class SingerDetailComponent implements OnInit,OnDestroy {
   singerDetail: SingerDetail;
   currentIndex:number;
   currentSong:Song;
+  hasLiked=false;
   private destroy$=new Subject<void>();
   simiSingers: Singer[];
   constructor(private route:ActivatedRoute,
     private store$:Store<AppStoreModule>,
     private songServe:SongService,
     private batchActionServe:BatchActionsService,
-    private nzMessageServe:NzMessageService
+    private nzMessageServe:NzMessageService,
+    private memberServe:MemberService
     ) { 
     this.route.data.pipe(map(res=>res.singerDetail)).subscribe(([detail,simiSingers])=>{
      this.singerDetail=detail;
@@ -86,6 +89,35 @@ export class SingerDetailComponent implements OnInit,OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+   }
+
+   onLikeSongs(songs:Song[]){
+     const ids=songs.map(item=>item.id).join(',');
+      this.onLikeSong(ids);
+   }
+
+   onLikeSong(id:string){
+     this.batchActionServe.likeSong(id);
+   }
+
+   onLikeSinger(id:string){
+    let typeInfo={
+      type:1,
+      msg:'收藏'
+    }
+    if(this.hasLiked){
+      typeInfo={
+        type:2,
+        msg:'取消收藏'
+      }
+    }
+    this.memberServe.likeSinger(id,typeInfo.type).subscribe(()=>{
+      this.hasLiked=!this.hasLiked;
+      this.nzMessageServe.create('error',typeInfo.msg+'成功')
+    },error=>{
+      this.nzMessageServe.create('error',error.msg||typeInfo.msg+'失败')
+    })
+    
    }
 
 }

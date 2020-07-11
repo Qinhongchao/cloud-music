@@ -1,4 +1,4 @@
-import { SetModalVisible, SetModalType, SetUserId, SetLikeId } from './../actions/member.action';
+import { SetModalVisible, SetModalType, SetUserId, SetLikeId, SetShareInfo } from './../actions/member.action';
 import { SetPlaying, SetPlayList, SetSongList, SetPlayMode, SetCurrentIndex, SetCurrentAction } from '../actions/player.action';
 import { PlayMode } from 'src/app/share/wy-ui/wy-player/player.type';
 import { Song } from 'src/app/data-types/common.types';
@@ -14,11 +14,19 @@ export enum ModalTypes{
 
 }
 
+export type ShareInfo={
+    id:string;
+    type:string;
+    txt:string;
+}
+
 export type MemberState={
     modalVisible:boolean;
     modalType:ModalTypes;
     userId:string;
     likeId:string;
+    shareInfo?:ShareInfo;
+
 
 }
 
@@ -38,7 +46,8 @@ const reducer=createReducer(
     on(SetModalVisible,(state,{modalVisible})=>({...state,modalVisible})),
     on(SetModalType,(state,{modalType})=>({...state,modalType})),
     on(SetUserId,(state,{userId})=>({...state,userId})),
-    on(SetLikeId,(state,{likeId})=>({...state,likeId}))
+    on(SetLikeId,(state,{likeId})=>({...state,likeId})),
+    on(SetShareInfo,(state,{shareInfo})=>({...state,shareInfo}))
     
     
     

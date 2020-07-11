@@ -2,7 +2,7 @@ import { SongService } from 'src/app/services/song.service';
 import { map, takeUntil, findIndex } from 'rxjs/internal/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Song } from 'src/app/data-types/common.types';
+import { Song, Singer } from 'src/app/data-types/common.types';
 import { BaseLyricLine, WyLyric } from 'src/app/share/wy-ui/wy-player/wy-player-panel/wy-lyric';
 import { Store, select } from '@ngrx/store';
 import { AppStoreModule } from 'src/app/store';
@@ -10,6 +10,7 @@ import { BatchActionsService } from 'src/app/store/batch-actions.service';
 import { NzMessageService } from 'ng-zorro-antd';
 import { Observable, Subject } from 'rxjs';
 import { getPlayer, getCurrentSong } from 'src/app/store/selectors/player.selector';
+import { SetShareInfo } from 'src/app/store/actions/member.action';
 
 
 @Component({
@@ -81,6 +82,33 @@ export class SongInfoComponent implements OnInit ,OnDestroy{
         }
       });
     }
+  }
+
+  
+  onLikeSong(id: string) {
+
+
+    this.batchActionServe.likeSong(id);
+
+  }
+
+  onShareSong(resource: Song , type = 'song') {
+    let txt = '';
+      txt = this.makeTxt('歌曲', resource.name, (<Song>resource).ar);
+    this.store$.dispatch(SetShareInfo({ shareInfo: { id: resource.id.toString(), type, txt } }));
+  }
+  makeTxt(type: string, name: string, makeBy: string | Singer[]): string {
+
+    let makeByStr = '';
+
+    if (Array.isArray(makeBy)) {
+      makeByStr = makeBy.map(item => item.name).join('/');
+    } else {
+      makeByStr = makeBy;
+    }
+
+    return `${type}:${name}--${makeByStr}`;
+
   }
 
 }

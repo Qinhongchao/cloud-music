@@ -1,9 +1,11 @@
+import { getMember, getShareInfo } from './../../store/selectors/member.selector';
+import { SetShareInfo } from './../../store/actions/member.action';
 import { MemberService } from 'src/app/services/member.service';
 import { findIndex } from 'src/app/utils/array';
 import { BatchActionsService } from './../../store/batch-actions.service';
 import { getPlayer, getCurrentSong } from './../../store/selectors/player.selector';
 import { AppStoreModule } from './../../store/index';
-import { SongSheet, Song } from './../../data-types/common.types';
+import { SongSheet, Song, Singer } from './../../data-types/common.types';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { map, takeUntil } from 'rxjs/internal/operators';
@@ -11,7 +13,7 @@ import { Store, select } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { SongService } from 'src/app/services/song.service';
 
-import { ModalTypes } from 'src/app/store/reducers/member.reducer';
+import { ModalTypes, ShareInfo } from 'src/app/store/reducers/member.reducer';
 import { NzMessageService } from 'ng-zorro-antd';
 
 @Component({
@@ -39,6 +41,7 @@ export class SheetInfoComponent implements OnInit,OnDestroy {
   private destroy$=new Subject<void>();
  public  currentSong: Song;
   currentIndex: number=-1;
+  shareInfo:ShareInfo;
 
   constructor(
     private route:ActivatedRoute,
@@ -70,6 +73,8 @@ export class SheetInfoComponent implements OnInit,OnDestroy {
         this.currentIndex=-1;
       }
     })
+
+  
   }
 
   ngOnInit(): void {
@@ -164,5 +169,29 @@ export class SheetInfoComponent implements OnInit,OnDestroy {
 
   alertMessage(type:string,msg:string) {
     this.messageServe.create(type,msg);
+  }
+
+  shareResource(resource:Song|SongSheet,type='song'){
+    let txt='';
+    if(type==="playlist"){
+      txt=this.makeTxt('歌单',resource.name,(<SongSheet>resource).creator.nickname);
+    }else{
+      txt=this.makeTxt('歌曲',resource.name,(<Song>resource).ar);
+    }
+
+    this.store$.dispatch(SetShareInfo({shareInfo:{id:resource.id.toString(),type,txt}}));
+  }
+  makeTxt(type:string,name:string,makeBy:string|Singer[]): string {
+
+    let makeByStr='';
+
+    if(Array.isArray(makeBy)){
+      makeByStr=makeBy.map(item=>item.name).join('/');
+    }else{
+      makeByStr=makeBy;
+    }
+
+    return `${type}:${name}--${makeByStr}`;
+    
   }
 }
