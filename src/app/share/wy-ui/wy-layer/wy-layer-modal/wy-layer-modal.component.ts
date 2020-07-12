@@ -4,7 +4,7 @@ import { BatchActionsService } from 'src/app/store/batch-actions.service';
 import { Overlay, OverlayRef, OverlayKeyboardDispatcher, BlockScrollStrategy, OverlayContainer } from '@angular/cdk/overlay';
 import { getMember, getModalVisible, getModalType } from './../../../../store/selectors/member.selector';
 import { AppStoreModule } from './../../../../store/index';
-import { Component, OnInit, ChangeDetectionStrategy, ElementRef, ChangeDetectorRef, ViewChild, AfterViewInit, Renderer2, Inject, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ElementRef, ChangeDetectorRef, ViewChild, AfterViewInit, Renderer2, Inject, EventEmitter, Output, Input } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { ModalTypes } from 'src/app/store/reducers/member.reducer';
 import { ESCAPE } from '@angular/cdk/keycodes'
@@ -24,6 +24,13 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   ])]
 })
 export class WyLayerModalComponent implements OnInit, AfterViewInit {
+  modalTitle={
+    register:'注册',
+    loginByPhone:'手机登录',
+    share:'分享',
+    like:'收藏',
+    default:''
+  }
   private visible: boolean = false;
   public currentModalType: ModalTypes = ModalTypes.Default;
   private overlayRef: OverlayRef;
@@ -36,6 +43,8 @@ export class WyLayerModalComponent implements OnInit, AfterViewInit {
 
   private resizeHandler: () => void;
   @Output() onLoadMySheets = new EventEmitter<void>();
+
+  @Input() showSpin=false;
 
   constructor(
     @Inject(WINDOW) private win: Window,

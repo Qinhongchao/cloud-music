@@ -103,6 +103,23 @@ export class MemberService {
     return this.http.get(this.uri+'artist/sub',{params}).pipe(map((res:SampleBack)=>res.code))
   }
 
+  sendCode(phone:number):Observable<number>{
+    const params =new HttpParams({fromString:queryString.stringify({phone})});
+    return this.http.get(this.uri+'captcha/sent',{params}).pipe(map((res:SampleBack)=>res.code))
+  }
+
+
+  checkCode(phone:number,captcha:number):Observable<number>{
+    const params =new HttpParams({fromString:queryString.stringify({phone,captcha})});
+    return this.http.get(this.uri+'captcha/verify',{params}).pipe(map((res:SampleBack)=>res.code))
+  }
+
+
+  checkExist(phone:number):Observable<number>{
+    const params =new HttpParams({fromString:queryString.stringify({phone})});
+    return this.http.get(this.uri+'callphone/existence/check',{params}).pipe(map((res:{exist:number})=>res.exist))
+  }
+
 
 
  

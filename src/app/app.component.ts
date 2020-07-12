@@ -43,6 +43,7 @@ export class AppComponent {
   modalVisible: boolean;
   modalType: ModalTypes;
   shareInfo: ShareInfo;
+  showSpin:boolean=false;
 
 
   constructor(
@@ -161,6 +162,7 @@ export class AppComponent {
   }
 
   doLogin(params:LoginParams) {
+    this.showSpin=true;
     this.memberServe.login(params).subscribe(user=>{
       this.user=user;
       this.batchActionsService.controlModal(false);
@@ -177,9 +179,11 @@ export class AppComponent {
 
 
       }
+
     },error=>{
       this.alertMessage('error',error.message||'登录失败');
-    })
+      this.showSpin=false;
+    },()=>{this.showSpin=false;})
 
   }
 
@@ -250,6 +254,11 @@ export class AppComponent {
     },error=>{
       this.alertMessage('error',error.msg||'分享失败');
     })
+  }
+
+  onRegister(phone:string){
+    this.alertMessage('success',phone+'注册成功');
+
   }
 
 
