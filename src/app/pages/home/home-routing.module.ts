@@ -6,7 +6,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 
 const routes: Routes = [
-  {path:'home',component:HomeComponent,data:{title:'发现'},resolve:{homeDatas:HomeResolveService}}
+  {path:'',component:HomeComponent,data:{title:'发现'},resolve:{homeDatas:HomeResolveService}}
 ];
 
 @NgModule({

@@ -112,6 +112,7 @@ export class BatchActionsService {
   insertSongs(songs:Song[]){
     const songList=this.playerState.songList.slice();
     const playList=this.playerState.playList.slice();
+    
     songs.forEach(item=>{
       const pIndex=findIndex(playList,item);
       if(pIndex===-1){

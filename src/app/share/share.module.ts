@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import {NgZorroAntdModule} from 'ng-zorro-antd';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { ClickoutsideDirective } from './directives/clickoutside.directive';
+import { ImgDefaultDirective } from './directives/img-default.directive';
 
 
 
@@ -21,9 +22,10 @@ import { ClickoutsideDirective } from './directives/clickoutside.directive';
     CommonModule,
     FormsModule,
     NgZorroAntdModule,
-    WyUiModule
+    WyUiModule,
+    ImgDefaultDirective
     
   ],
-  declarations: []
+  declarations: [ImgDefaultDirective]
 })
 export class ShareModule { }

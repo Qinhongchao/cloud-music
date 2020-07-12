@@ -1,3 +1,4 @@
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { getMember, getLikeId, getModalVisible, getModalType, getShareInfo } from './store/selectors/member.selector';
 import { StorageService } from './services/storage.service';
 import { NzMessageService } from 'ng-zorro-antd';
@@ -8,13 +9,16 @@ import { ModalTypes, ShareInfo } from 'src/app/store/reducers/member.reducer';
 import { isEmptyObject } from 'src/app/utils/tools';
 import { SearchResult, SongSheet } from './data-types/common.types';
 import { SearchService } from './services/search.service';
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { AppStoreModule } from './store';
 import { Store, select } from '@ngrx/store';
 import { MemberService, LikeSongParams, ShareParams } from './services/member.service';
 import { User } from './data-types/member.types';
 import { codeJson } from './utils/base64';
-import { takeUntil } from 'rxjs/internal/operators';
+import { takeUntil, filter, map, mergeMap } from 'rxjs/internal/operators';
+import { Observable, interval } from 'rxjs';
+import { Title } from '@angular/platform-browser';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +26,8 @@ import { takeUntil } from 'rxjs/internal/operators';
   styleUrls: ['./app.component.less']
 })
 export class AppComponent {
+
+
 
   title = 'cloud-music';
   menu=[
@@ -44,6 +50,9 @@ export class AppComponent {
   modalType: ModalTypes;
   shareInfo: ShareInfo;
   showSpin:boolean=false;
+  navEnd: Observable<NavigationEnd>;
+  routeTitle: any;
+  loadPercent:number=0;
 
 
   constructor(
@@ -52,7 +61,11 @@ export class AppComponent {
     private batchActionsService: BatchActionsService,
     private memberServe:MemberService,
     private messageServe:NzMessageService,
-    private storageServe:StorageService
+    private storageServe:StorageService,
+    private router:Router,
+    private activatedRoute:ActivatedRoute,
+    private titleServe:Title,
+    @Inject(DOCUMENT) private doc
     ){
 
      
@@ -69,9 +82,46 @@ export class AppComponent {
       }
 
       this.listenStates();
+      this.router.events.pipe(filter(evt=>evt instanceof NavigationEnd)).subscribe(()=>{
+        this.loadPercent=0;
+        this.setTitle();
+      })
 
+      this.navEnd=<Observable<NavigationEnd>>this.router.events.pipe(filter(evt=>evt instanceof NavigationEnd));
+      this.setLoadingBar();
+      
   }
 
+  setLoadingBar() {
+    interval(100).pipe(takeUntil(this.navEnd)).subscribe(()=>{
+      this.loadPercent=Math.max(95,++this.loadPercent);
+    });
+
+    this.navEnd.subscribe(()=>{
+      this.loadPercent=100;
+      
+    })
+    
+  }
+
+
+  setTitle() {
+    this.navEnd.pipe(
+      map(()=>this.activatedRoute),
+      map((route:ActivatedRoute)=>{
+        while(route.firstChild){
+          route=route.firstChild;
+        }
+        return route;
+      }),
+      mergeMap(route=>route.data)
+      
+    ).subscribe((data)=>{
+      this.routeTitle=data['title'];
+      this.titleServe.setTitle(this.routeTitle);
+
+    })
+  }
 
   listenStates() {
     this.store$.pipe(select(getMember),select(getLikeId)).subscribe(likeId=>{

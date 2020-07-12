@@ -53,7 +53,7 @@
                     <div class="list">
                         <div class="card" *ngFor="let item of singers" [routerLink]="['/singer',item.id]">
                             <div class="pic">
-                                <img [src]="item.picUrl" alt="">
+                                <img appImgDefault [src]="item.picUrl" alt="">
                             </div>
                             <div class="txt">
                                 <b class="ellipsis">{{item.name}}</b>
